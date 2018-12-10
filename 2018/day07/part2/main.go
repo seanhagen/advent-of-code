@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/seanhagen/advent-of-code-2018/day7"
-	"github.com/seanhagen/advent-of-code-2018/lib"
+	day7 "github.com/seanhagen/advent-of-code/2018/day07"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 /*

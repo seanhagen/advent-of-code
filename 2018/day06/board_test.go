@@ -4,7 +4,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/seanhagen/advent-of-code-2018/lib"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 func TestBoard(t *testing.T) {

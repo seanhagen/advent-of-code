@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/seanhagen/advent-of-code-2018/day10"
+	"github.com/seanhagen/advent-of-code/2018/day10"
 )
 
 /*

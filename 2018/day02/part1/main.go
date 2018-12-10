@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/seanhagen/advent-of-code-2018/lib"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 /*

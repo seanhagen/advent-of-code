@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/seanhagen/advent-of-code-2018/day9"
+	day9 "github.com/seanhagen/advent-of-code/2018/day09"
 )
 
 /*

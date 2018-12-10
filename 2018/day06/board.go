@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/seanhagen/advent-of-code-2018/lib"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 const marks = "ABCDEFGHIJKLMNOP1234567890!@#$%^&*()[]{}|;:',<.>/?`~"

@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/seanhagen/advent-of-code-2018/lib"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 /*
@@ -60,7 +60,6 @@ func main() {
 	}
 
 	spew.Dump(shortest, remove)
-
 }
 
 func getTypes(in string) []string {
