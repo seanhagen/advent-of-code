@@ -25,7 +25,7 @@ func (g Generation) count() int {
 	data := g.pots.getHashes()
 	sum := 0
 
-	fmt.Printf("generation %v: %v pots have plants, ", g.id, len(data))
+	// fmt.Printf("generation %v: %v pots have plants, ", g.id, len(data))
 	// fmt.Printf("plants in pots [")
 	// for k := range data {
 	// 	fmt.Printf("%v ", k)

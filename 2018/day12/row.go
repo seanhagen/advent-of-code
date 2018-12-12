@@ -61,11 +61,10 @@ func (r Row) getHashes() map[int]string {
 
 func createRowFromString(in string) Row {
 	in = strings.Replace(in, "initial state: ", "", -1)
-	// fmt.Printf("creating row from string '%v', len: %v\n", in, len(in))
 	bits := strings.Split(in, "")
 	init := map[int]string{}
 
-	for i := -10000; i <= 10000; i++ {
+	for i := -1000; i <= 1000; i++ {
 		init[i] = "."
 		if i >= 0 && i < len(bits) {
 			init[i] = bits[i]
