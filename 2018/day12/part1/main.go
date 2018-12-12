@@ -117,5 +117,5 @@ func main() {
 	g.TakeSteps(20)
 
 	c := g.SumCurrent()
-	fmt.Printf("number of plants in generation 20: %v\n\n", c)
+	fmt.Printf("sum: %v\n\n", c)
 }

@@ -14,6 +14,17 @@ func TestInitialState(t *testing.T) {
 	}
 }
 
+func TestInitialSum(t *testing.T) {
+	g := SetupGame("./test.txt")
+
+	expect := 145
+	out := g.SumCurrent()
+
+	if expect != out {
+		t.Errorf("wrong sum! expected %v, got %v", expect, out)
+	}
+}
+
 func TestSecondGeneration(t *testing.T) {
 	expect := " 1: ...#...#....#.....#..#..#..#..........."
 	g := SetupGame("./test.txt")
