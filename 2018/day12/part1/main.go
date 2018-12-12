@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/seanhagen/advent-of-code/2018/day12"
+)
 
 /*
 --- Day 12: Subterranean Sustainability ---
@@ -109,5 +113,9 @@ After 20 generations, what is the sum of the numbers of all pots which contain a
 */
 
 func main() {
-	fmt.Printf("nope")
+	g := day12.SetupGame("../input.txt")
+	g.TakeSteps(20)
+
+	c := g.SumCurrent()
+	fmt.Printf("number of plants in generation 20: %v\n\n", c)
 }

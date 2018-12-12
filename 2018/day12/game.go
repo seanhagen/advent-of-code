@@ -1,7 +1,6 @@
 package day12
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/seanhagen/advent-of-code/lib"
@@ -51,16 +50,16 @@ func (g Game) OutputCurrent() string {
 
 // CountCurrent ...
 func (g Game) SumCurrent() int {
-	sum := 0
-	// spew.Dump(g.current)
-	for i, d := range g.current.pots.data {
-		if d == "#" {
-			sum += i - 2
-			fmt.Printf("data[%v] = %v, sum: %v\n", i, d, sum)
-		}
-	}
+	return g.current.count()
+	// sum := 0
+	// // spew.Dump(g.current)
+	// for i, d := range g.current.pots.data {
+	// 	if d == "#" {
+	// 		sum += i - 2
+	// 	}
+	// }
 
-	return sum
+	// return sum
 }
 
 // SetupGame ...

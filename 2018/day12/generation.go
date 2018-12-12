@@ -20,13 +20,26 @@ func createGeneration(in string) *Generation {
 	return gen
 }
 
+// count ...
+func (g Generation) count() int {
+	data := g.pots.getHashes()
+	sum := 0
+	// spew.Dump(data)
+
+	for i := range data {
+		sum += i
+	}
+
+	return sum
+}
+
 // output ...
 func (g Generation) output() string {
 	first := 100
 	max := -100
 	keys := []int{}
 
-	for i, v := range g.pots.d {
+	for i, v := range g.pots.data {
 		keys = append(keys, i)
 		if v == "#" && i < first {
 			first = i
@@ -38,16 +51,9 @@ func (g Generation) output() string {
 	sort.Ints(keys)
 
 	t := ""
-	for i := first - 3; i < max+12; i++ {
-		x := g.pots.d[i]
-		// fmt.Printf("d[%v] = %v\n", i, x)
-		if x == "" {
-			t = fmt.Sprintf("%v.", t)
-		} else {
-			t = fmt.Sprintf("%v%v", t, g.pots.d[i])
-		}
+	for i := -3; i < 36; i++ {
+		t = fmt.Sprintf("%v%v", t, g.pots.data[i])
 	}
-
 	t = fmt.Sprintf("%2d: %v", g.id, t)
 	return t
 }

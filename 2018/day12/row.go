@@ -6,18 +6,17 @@ import (
 
 // Row ...
 type Row struct {
-	data []string
-	d    map[int]string
+	data map[int]string
 }
 
 // getFromPosition ...
 func (r Row) getFromPosition(pos, dist int) string {
 	newPos := pos + dist
-	x := r.d[newPos]
+	x := r.data[newPos]
 	if x == "" {
-		r.d[newPos] = "."
+		r.data[newPos] = "."
 	}
-	return r.d[newPos]
+	return r.data[newPos]
 }
 
 // applyRule ...
@@ -35,44 +34,42 @@ func (r Row) applyRule(in Rule, pos int) bool {
 // getNext ...
 func (r Row) getNext(in []Rule) Row {
 	n := map[int]string{}
-	for k := range r.d {
+	for k := range r.data {
 		n[k] = "."
-		change := false
-		to := ""
 		for _, rule := range in {
-			change = r.applyRule(rule, k)
+			change := r.applyRule(rule, k)
 			if change {
-				to = rule.output
+				n[k] = rule.output
 			}
 		}
-		if change {
-			n[k] = to
+	}
+	return Row{data: n}
+}
+
+// getHashes ...
+func (r Row) getHashes() map[int]string {
+	n := map[int]string{}
+
+	for k, v := range r.data {
+		if v == "#" {
+			n[k] = v
 		}
 	}
 
-	return Row{d: n}
+	return n
 }
 
 func createRowFromString(in string) Row {
 	in = strings.Replace(in, "initial state: ", "", -1)
 	bits := strings.Split(in, "")
+	init := map[int]string{}
 
-	init := map[int]string{
-		-3: ".",
-		-2: ".",
-		-1: ".",
+	for i := -100; i <= 100; i++ {
+		init[i] = "."
+		if i >= 0 && i < len(bits) {
+			init[i] = bits[i]
+		}
 	}
 
-	for i, v := range bits {
-		init[i] = v
-	}
-
-	initial := []string{".", ".", "."}
-	initial = append(initial, bits...)
-	for i := 1; i <= 10; i++ {
-		initial = append(initial, ".")
-		init[i+len(in)] = "."
-	}
-
-	return Row{data: initial, d: init}
+	return Row{data: init}
 }
