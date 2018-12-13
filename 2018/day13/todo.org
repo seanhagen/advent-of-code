@@ -1,0 +1,3 @@
+* process the tracks
+** need to be able to guess the right type of track where a cart is
+* output the current state of the track ( for testing the example )
