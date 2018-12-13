@@ -9,12 +9,7 @@ var nextTurn = map[int]string{
 // Cart ...
 type Cart struct {
 	facing Facing
-
-	prevInput string
-
-	prevTurn int
-
-	turn int
+	turn   int
 
 	xvel int
 	yvel int
@@ -61,12 +56,11 @@ func CreateCart(in string, x, y int) *Cart {
 		return nil
 	default:
 		return &Cart{
-			facing:   f,
-			x:        x,
-			y:        y,
-			xvel:     xvel,
-			yvel:     yvel,
-			prevTurn: 2,
+			facing: f,
+			x:      x,
+			y:      y,
+			xvel:   xvel,
+			yvel:   yvel,
 		}
 	}
 }
