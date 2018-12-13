@@ -1,9 +1,9 @@
 package day13
 
-var nextTurn = []string{
-	"left",
-	"straight",
-	"right",
+var nextTurn = map[int]string{
+	2: "left",
+	1: "straight",
+	0: "right",
 }
 
 // Cart ...
@@ -13,6 +13,8 @@ type Cart struct {
 	prevInput string
 
 	prevTurn int
+
+	turn int
 
 	xvel int
 	yvel int
@@ -27,9 +29,12 @@ func (c *Cart) Process(in string) {
 	c.Move()
 
 	if in == "+" {
-		c.prevTurn++
-		n := len(nextTurn) % c.prevTurn
-		nt := nextTurn[n]
+		c.turn--
+		if c.turn < 0 {
+			c.turn = 2
+		}
+		nt := nextTurn[c.turn]
+		// fmt.Printf("need to turn '%v'\n", nt)
 		c.facing.Turn(nt)
 
 		c.xvel, c.yvel = c.facing.Velocity()
@@ -56,11 +61,12 @@ func CreateCart(in string, x, y int) *Cart {
 		return nil
 	default:
 		return &Cart{
-			facing: f,
-			x:      x,
-			y:      y,
-			xvel:   xvel,
-			yvel:   yvel,
+			facing:   f,
+			x:        x,
+			y:        y,
+			xvel:     xvel,
+			yvel:     yvel,
+			prevTurn: 2,
 		}
 	}
 }
