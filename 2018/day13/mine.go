@@ -90,8 +90,6 @@ func (m *Mine) Step() {
 		cp[c.y] = tmpy
 
 		m.carts[i] = c
-		// o := m.Print()
-		// fmt.Printf("cart %#v, next: <%v, %v>\ntrack:\t%vnext track: %v\n\n", c, nx, ny, o, n)
 	}
 	m.cartPos = cp
 }
@@ -101,8 +99,6 @@ func (m Mine) CheckCollision() (bool, int, int) {
 	for y, row := range m.cartPos {
 		for x, carts := range row {
 			if len(carts) > 1 {
-				// fmt.Printf("carts at <%v, %v>: \n", x, y)
-				// spew.Dump(carts)
 				return true, x, y
 			}
 		}
@@ -110,12 +106,53 @@ func (m Mine) CheckCollision() (bool, int, int) {
 	return false, 0, 0
 }
 
+// RemoveCollided ...
+func (m *Mine) RemoveCollided() {
+	newCarts := []*Cart{}
+	for _, row := range m.cartPos {
+		for _, carts := range row {
+			if len(carts) > 1 {
+				for _, c := range m.carts {
+					found := false
+					for _, cn := range carts {
+						if c == cn {
+							found = true
+						}
+					}
+					if !found {
+						newCarts = append(newCarts, c)
+					}
+				}
+				// fmt.Printf("need to remove carts at <%v, %v>\n", x, y)
+				// return
+			}
+		}
+	}
+	m.carts = newCarts
+
+	newPos := map[int]map[int][]*Cart{}
+	for _, c := range newCarts {
+		tmpy, ok := newPos[c.y]
+		if !ok {
+			tmpy = map[int][]*Cart{}
+		}
+
+		tmpx, ok := tmpy[c.x]
+		if !ok {
+			tmpx = []*Cart{}
+		}
+		tmpx = append(tmpx, c)
+		tmpy[c.x] = tmpx
+		newPos[c.y] = tmpy
+	}
+	m.cartPos = newPos
+}
+
 // StepUntilCollision ...
 func (m *Mine) StepUntilCollision() (int, int) {
 	x := 0
 	y := 0
 
-	// i := 0
 	for {
 		m.Step()
 		c, cx, cy := m.CheckCollision()
@@ -124,15 +161,29 @@ func (m *Mine) StepUntilCollision() (int, int) {
 			y = cy
 			break
 		}
-		// if i > 14 {
-		// 	break
-		// }
-		// i++
-
-		// o := m.Print()
-		// fmt.Printf("step %v:\n%v\n\n", i, o)
 	}
 
+	return x, y
+}
+
+// StepUntilOneCart ...
+func (m Mine) StepUntilOneCart() (int, int) {
+	x := 0
+	y := 0
+	for {
+		m.Step()
+
+		o := m.Print()
+		fmt.Printf("mine:\n%v\n", o)
+
+		m.RemoveCollided()
+		if len(m.carts) == 1 {
+			c := m.carts[0]
+			x = c.x
+			y = c.y
+			break
+		}
+	}
 	return x, y
 }
 

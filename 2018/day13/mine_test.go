@@ -1,6 +1,7 @@
 package day13
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -236,5 +237,32 @@ func TestStepUntilCollision(t *testing.T) {
 	got := m.Print()
 	if got != expect {
 		t.Errorf("wrong output, expected:\n%vgot:\n%v\n", expect, got)
+	}
+}
+
+func TestStepUntilOneCart(t *testing.T) {
+	ex, ey := 6, 4
+	m := SetupMine("part2-test.txt")
+
+	o := m.Print()
+	fmt.Printf("mine:\n%v\n", o)
+
+	x, y := m.StepUntilCollision()
+	o = m.Print()
+	fmt.Printf("mine:\n%v\n", o)
+
+	e := `/---\
+|   |
+| /-+-\
+| | | |
+\-+-/ ^
+  |   |
+  \---/
+`
+
+	fmt.Printf("expect:\n%v\n", e)
+
+	if ex != x || ey != y {
+		t.Errorf("wrong coordinates for last cart, expected <%v, %v>, got <%v, %v>", ex, ey, x, y)
 	}
 }
