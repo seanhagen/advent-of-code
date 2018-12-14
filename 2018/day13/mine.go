@@ -101,6 +101,8 @@ func (m Mine) CheckCollision() (bool, int, int) {
 	for y, row := range m.cartPos {
 		for x, carts := range row {
 			if len(carts) > 1 {
+				// fmt.Printf("carts at <%v, %v>: \n", x, y)
+				// spew.Dump(carts)
 				return true, x, y
 			}
 		}
@@ -113,7 +115,7 @@ func (m *Mine) StepUntilCollision() (int, int) {
 	x := 0
 	y := 0
 
-	i := 0
+	// i := 0
 	for {
 		m.Step()
 		c, cx, cy := m.CheckCollision()
@@ -122,10 +124,10 @@ func (m *Mine) StepUntilCollision() (int, int) {
 			y = cy
 			break
 		}
-		if i > 14 {
-			break
-		}
-		i++
+		// if i > 14 {
+		// 	break
+		// }
+		// i++
 
 		// o := m.Print()
 		// fmt.Printf("step %v:\n%v\n\n", i, o)
