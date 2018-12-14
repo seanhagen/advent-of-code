@@ -1,8 +1,9 @@
 package day13
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 func TestTrackOnly(t *testing.T) {
@@ -243,14 +244,9 @@ func TestStepUntilCollision(t *testing.T) {
 func TestStepUntilOneCart(t *testing.T) {
 	ex, ey := 6, 4
 	m := SetupMine("part2-test.txt")
+	x, y := m.StepUntilOneCart()
 
 	o := m.Print()
-	fmt.Printf("mine:\n%v\n", o)
-
-	x, y := m.StepUntilCollision()
-	o = m.Print()
-	fmt.Printf("mine:\n%v\n", o)
-
 	e := `/---\
 |   |
 | /-+-\
@@ -259,10 +255,12 @@ func TestStepUntilOneCart(t *testing.T) {
   |   |
   \---/
 `
-
-	fmt.Printf("expect:\n%v\n", e)
-
 	if ex != x || ey != y {
 		t.Errorf("wrong coordinates for last cart, expected <%v, %v>, got <%v, %v>", ex, ey, x, y)
+	}
+
+	if o != e {
+		spew.Dump(m.cartPos)
+		t.Errorf("wrong mine for last cart.\nexpected:\n%v\ngot:\n%v\n", e, o)
 	}
 }

@@ -29,7 +29,6 @@ func (m Mine) Print() string {
 	for y := 0; y <= m.maxy; y++ {
 		for x := 0; x <= m.maxx; x++ {
 			crts := m.cartPos[y][x]
-
 			cnt := len(crts)
 			if cnt > 0 {
 				if cnt > 1 {
@@ -108,27 +107,25 @@ func (m Mine) CheckCollision() (bool, int, int) {
 
 // RemoveCollided ...
 func (m *Mine) RemoveCollided() {
+	fmt.Printf("old carts: \n")
+	for _, v := range m.carts {
+		fmt.Printf("\t<%v,%v>\n", v.x, v.y)
+	}
+	fmt.Printf("\n")
 	newCarts := []*Cart{}
 	for _, row := range m.cartPos {
 		for _, carts := range row {
-			if len(carts) > 1 {
-				for _, c := range m.carts {
-					found := false
-					for _, cn := range carts {
-						if c == cn {
-							found = true
-						}
-					}
-					if !found {
-						newCarts = append(newCarts, c)
-					}
-				}
-				// fmt.Printf("need to remove carts at <%v, %v>\n", x, y)
-				// return
+			if len(carts) < 2 {
+				newCarts = append(newCarts, carts...)
 			}
 		}
 	}
 	m.carts = newCarts
+	fmt.Printf("new carts: \n")
+	for _, v := range newCarts {
+		fmt.Printf("\t<%v,%v>\n", v.x, v.y)
+	}
+	fmt.Printf("\n")
 
 	newPos := map[int]map[int][]*Cart{}
 	for _, c := range newCarts {
@@ -162,7 +159,6 @@ func (m *Mine) StepUntilCollision() (int, int) {
 			break
 		}
 	}
-
 	return x, y
 }
 
@@ -171,11 +167,8 @@ func (m Mine) StepUntilOneCart() (int, int) {
 	x := 0
 	y := 0
 	for {
+		m.RemoveCollided()
 		m.Step()
-
-		o := m.Print()
-		fmt.Printf("mine:\n%v\n", o)
-
 		m.RemoveCollided()
 		if len(m.carts) == 1 {
 			c := m.carts[0]
