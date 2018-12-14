@@ -37,13 +37,33 @@ func (c *Cart) Process(in string) {
 		c.facing.Next(in)
 		c.xvel, c.yvel = c.facing.Velocity()
 	}
-	// fmt.Printf("\t%#v\n", c)
+	// fmt.Printf("\t%s - %#v\n", c.facing, c)
 }
 
 // Move ...
 func (c *Cart) Move() {
 	c.x += c.xvel
 	c.y += c.yvel
+}
+
+// Under ...
+func (c Cart) Under() string {
+	switch c.facing {
+	case FacingSouth:
+		fallthrough
+	case FacingNorth:
+		return "|"
+	case FacingEast:
+		fallthrough
+	case FacingWest:
+		return "-"
+	}
+	return ""
+}
+
+// NextPos ...
+func (c Cart) NextPos() (int, int) {
+	return c.x + c.xvel, c.y + c.yvel
 }
 
 // CreateCart ...

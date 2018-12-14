@@ -9,11 +9,11 @@ const (
 	// FacingNorth ...
 	FacingNorth
 	// FacingEast ...
-	FacingEast = 2
+	FacingEast
 	// FacingSouth ...
-	FacingSouth = 3
+	FacingSouth
 	// FacingWest ...
-	FacingWest = 4
+	FacingWest
 )
 
 // Turn ...
@@ -77,11 +77,11 @@ func (f Facing) Velocity() (int, int) {
 
 	switch f {
 	case FacingNorth:
-		y = 1
+		y = -1
 	case FacingEast:
 		x = 1
 	case FacingSouth:
-		y = -1
+		y = 1
 	case FacingWest:
 		x = -1
 	}
@@ -93,15 +93,25 @@ func (f Facing) Velocity() (int, int) {
 func (f *Facing) Next(in string) {
 	switch in {
 	case "/":
-		if *f == FacingNorth {
+		switch *f {
+		case FacingNorth:
 			*f = FacingEast
-		} else {
+		case FacingSouth:
 			*f = FacingWest
+		case FacingEast:
+			*f = FacingNorth
+		case FacingWest:
+			*f = FacingSouth
 		}
 	case "\\":
-		if *f == FacingEast {
+		switch *f {
+		case FacingNorth:
+			*f = FacingWest
+		case FacingSouth:
+			*f = FacingEast
+		case FacingEast:
 			*f = FacingSouth
-		} else {
+		case FacingWest:
 			*f = FacingNorth
 		}
 	}

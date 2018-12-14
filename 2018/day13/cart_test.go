@@ -41,8 +41,8 @@ func TestCartMove(t *testing.T) {
 		nexty  int
 	}{
 		{">", 1, 1, 2, 1},
-		{"^", 1, 1, 1, 2},
-		{"v", 1, 1, 1, 0},
+		{"^", 1, 1, 1, 0},
+		{"v", 1, 1, 1, 2},
 		{"<", 1, 1, 0, 1},
 	}
 
@@ -73,10 +73,10 @@ func TestCartNext(t *testing.T) {
 		// // |      |      ^
 		// // |  =>  ^  =>  |
 		// // ^      |      |
-		{[]string{"^", "|", "|"}, 0, 0, 0, 2},
+		{[]string{"^", "|", "|"}, 0, 2, 0, 0},
 		// //  >-\   =>  ->\   =>  --v  =>  --\
 		// //    |         |         |        v
-		{[]string{">", "-", "\\", "|"}, 10, 10, 12, 9},
+		{[]string{">", "-", "\\", "|"}, 10, 10, 12, 11},
 		// // >-\  => ->\  => --v
 		{[]string{">", "-", "\\"}, 0, 0, 2, 0},
 
@@ -86,14 +86,24 @@ func TestCartNext(t *testing.T) {
 		{[]string{">", "-", "\\", "|", "/", "-", "-", "\\", "|", "/", "-"}, 1, 1, 1, 1},
 
 		// >-\  => ->\  => --v  => --\  => --\
-		//   +-      +-      +-      >-      +-
-		{[]string{">", "-", "\\", "+", "-"}, 0, 1, 3, 0},
+		//   +-      +-      +-      >-      +>
+		{[]string{">", "-", "\\", "+", "-"}, 0, 1, 3, 2},
 
 		// 10,10     11,10     12,10    12,9   13,9     14,9        14,8
 		// >-\    => ->\    => --v   => --\    => --\   => --\   => --\
 		//   +++       +++       +++      >+++      +>+      ++v      +++
 		//     |         |         |         |        |        |        v
-		{[]string{">", "-", "\\", "+", "+", "+", "|"}, 10, 10, 14, 8},
+		{[]string{">", "-", "\\", "+", "+", "+", "|"}, 10, 10, 14, 12},
+
+		// 10,10  11,10  12,10  12,9
+		//   | =>   | =>   | =>   ^
+		// >-/    ->/    --^    --/
+		{[]string{">", "-", "/", "|"}, 10, 10, 12, 9},
+
+		// 10,10    9,10    8,10     8,11
+		// /-<  =>  /<-  => v--   => /--
+		// |        |       |        v
+		{[]string{"<", "-", "/", "|"}, 10, 10, 8, 11},
 	}
 
 	for _, tt := range tests {
@@ -112,6 +122,50 @@ func TestCartNext(t *testing.T) {
 
 		if tt.endy != c.y {
 			t.Errorf("wrong endpoint y -- expected %v, got %v", tt.endy, c.y)
+		}
+	}
+}
+
+func TestCartUnder(t *testing.T) {
+	tests := []struct {
+		in string
+		u  string
+	}{
+		{"^", "|"},
+		{">", "-"},
+		{"v", "|"},
+		{"<", "-"},
+	}
+
+	for _, tt := range tests {
+		c := CreateCart(tt.in, 0, 0)
+		g := c.Under()
+
+		if tt.u != g {
+			t.Errorf("wrong output, expected '%v' got '%v'", tt.u, g)
+		}
+	}
+}
+
+func TestCartNextPos(t *testing.T) {
+	tests := []struct {
+		in    string
+		x     int
+		y     int
+		nextx int
+		nexty int
+	}{
+		{">", 0, 0, 1, 0},
+		{"^", 1, 1, 1, 0},
+		{"v", 1, 1, 1, 2},
+		{"<", 1, 1, 0, 1},
+	}
+
+	for _, tt := range tests {
+		c := CreateCart(tt.in, tt.x, tt.y)
+		nx, ny := c.NextPos()
+		if tt.nextx != nx || tt.nexty != ny {
+			t.Errorf("wrong next, expected <%v, %v>, got <%v, %v>", tt.nextx, tt.nexty, nx, ny)
 		}
 	}
 }
