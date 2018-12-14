@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/seanhagen/advent-of-code/2018/day13"
+)
 
 /*
 --- Day 13: Mine Cart Madness ---
@@ -194,5 +198,11 @@ In this example, the location of the first crash is 7,3.
 */
 
 func main() {
-	fmt.Printf("not ready")
+	m := day13.SetupMine("../input.txt")
+	x, y := m.StepUntilCollision()
+
+	fmt.Printf("collision at: <%v, %v>\n", x, y)
+
+	// o := m.Print()
+	// fmt.Printf("\n%v\n", o)
 }
