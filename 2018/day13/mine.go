@@ -5,6 +5,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/seanhagen/advent-of-code/lib"
 )
 
@@ -25,6 +26,8 @@ type Mine struct {
 // Print ...
 func (m Mine) Print() string {
 	out := ""
+	// spew.Dump(m.carts)
+	fmt.Printf("len carts: %v\n", len(m.carts))
 
 	for y := 0; y <= m.maxy; y++ {
 		for x := 0; x <= m.maxx; x++ {
@@ -107,11 +110,12 @@ func (m Mine) CheckCollision() (bool, int, int) {
 
 // RemoveCollided ...
 func (m *Mine) RemoveCollided() {
-	fmt.Printf("old carts: \n")
-	for _, v := range m.carts {
-		fmt.Printf("\t<%v,%v>\n", v.x, v.y)
-	}
-	fmt.Printf("\n")
+	// fmt.Printf("old carts: \n")
+	// for _, v := range m.carts {
+	// 	fmt.Printf("\t<%v,%v>\n", v.x, v.y)
+	// }
+	// fmt.Printf("\n")
+
 	newCarts := []*Cart{}
 	for _, row := range m.cartPos {
 		for _, carts := range row {
@@ -120,12 +124,15 @@ func (m *Mine) RemoveCollided() {
 			}
 		}
 	}
+	fmt.Printf("m.carts %v -- new carts: %v -- ", len(m.carts), len(newCarts))
 	m.carts = newCarts
-	fmt.Printf("new carts: \n")
-	for _, v := range newCarts {
-		fmt.Printf("\t<%v,%v>\n", v.x, v.y)
-	}
-	fmt.Printf("\n")
+	fmt.Printf("m.carts now: %v\n", len(m.carts))
+
+	// fmt.Printf("new carts: \n")
+	// for _, v := range newCarts {
+	// 	fmt.Printf("\t<%v,%v>\n", v.x, v.y)
+	// }
+	// fmt.Printf("\n")
 
 	newPos := map[int]map[int][]*Cart{}
 	for _, c := range newCarts {
@@ -177,6 +184,7 @@ func (m Mine) StepUntilOneCart() (int, int) {
 			break
 		}
 	}
+	spew.Dump(m.carts[0])
 	return x, y
 }
 

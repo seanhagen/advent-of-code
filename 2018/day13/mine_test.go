@@ -2,8 +2,6 @@ package day13
 
 import (
 	"testing"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 func TestTrackOnly(t *testing.T) {
@@ -246,6 +244,8 @@ func TestStepUntilOneCart(t *testing.T) {
 	m := SetupMine("part2-test.txt")
 	x, y := m.StepUntilOneCart()
 
+	// spew.Dump(m.carts)
+
 	o := m.Print()
 	e := `/---\
 |   |
@@ -260,7 +260,7 @@ func TestStepUntilOneCart(t *testing.T) {
 	}
 
 	if o != e {
-		spew.Dump(m.cartPos)
+		// spew.Dump(m.cartPos)
 		t.Errorf("wrong mine for last cart.\nexpected:\n%v\ngot:\n%v\n", e, o)
 	}
 }

@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/seanhagen/advent-of-code/2018/day13"
+)
 
 /*
 --- Part Two ---
@@ -54,5 +58,9 @@ is the only cart left?
 */
 
 func main() {
-	fmt.Printf("part 2 not done\n")
+	m := day13.SetupMine("../input.txt")
+	x, y := m.StepUntilOneCart()
+
+	fmt.Printf("last cart at: <%v, %v>\n", x, y)
+
 }
