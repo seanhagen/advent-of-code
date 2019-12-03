@@ -27,3 +27,9 @@ func LoopOverLines(file *os.File, fn func(line []byte) error) error {
 	}
 	return err
 }
+
+func ReadLine(file *os.File) ([]byte, error) {
+	r := bufio.NewReader(file)
+	line, _, err := r.ReadLine()
+	return line, err
+}
