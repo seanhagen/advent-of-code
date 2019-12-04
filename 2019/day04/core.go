@@ -47,7 +47,6 @@ func lenSmallestMatchingGroup(input int) int {
 
 	for _, b := range bits {
 		if b != last && last != "" {
-			// collector = collector + b
 			if len(collector+last) > 1 {
 				matches = append(matches, collector+last)
 			}
