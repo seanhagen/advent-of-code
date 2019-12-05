@@ -134,20 +134,8 @@ func (p *Program) Run() error {
 				y = p.data[pos+2]
 			}
 
-			out := x + y
-
-			switch pA {
-			case "0":
-				l := p.data[pos+3]
-				p.data[l] = out
-			case "1":
-				fmt.Printf("ADD write immediate location panic!")
-				fmt.Printf("two-digit opcode:\t%v\n", pDE)
-				fmt.Printf("mode of 1st param:\t%v\n", pC)
-				fmt.Printf("mode of 2nd param:\t%v\n", pB)
-				fmt.Printf("mode of 3rd param:\t%v\n", pA)
-				os.Exit(1)
-			}
+			z := p.data[pos+3]
+			p.data[z] = x + y
 
 		case OP_MUL:
 			var x, y int
@@ -167,33 +155,13 @@ func (p *Program) Run() error {
 				y = p.data[pos+2]
 			}
 
-			switch pA {
-			case "0":
-				l := p.data[pos+3]
-				p.data[l] = x * y
-			case "1":
-				fmt.Printf("MUL write immediate location panic!")
-				fmt.Printf("two-digit opcode:\t%v\n", pDE)
-				fmt.Printf("mode of 1st param:\t%v\n", pC)
-				fmt.Printf("mode of 2nd param:\t%v\n", pB)
-				fmt.Printf("mode of 3rd param:\t%v\n", pA)
-				os.Exit(1)
-			}
+			z := p.data[pos+3]
+			p.data[l] = x * y
 
 		case OP_SAV:
-			switch pC {
-			case "0":
-				a := p.data[pos+1]
-				p.data[a] = p.inputs[p.inPtr]
-				p.inPtr++
-			case "1":
-				fmt.Printf("SAV write immediate location panic!")
-				fmt.Printf("two-digit opcode:\t%v\n", pDE)
-				fmt.Printf("mode of 1st param:\t%v\n", pC)
-				fmt.Printf("mode of 2nd param:\t%v\n", pB)
-				fmt.Printf("mode of 3rd param:\t%v\n", pA)
-				os.Exit(1)
-			}
+			a := p.data[pos+1]
+			p.data[a] = p.inputs[p.inPtr]
+			p.inPtr++
 
 		case OP_OUT:
 			switch pC {
