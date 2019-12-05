@@ -66,8 +66,6 @@ DE - two-digit opcode,      02 == opcode 2
  A - mode of 3rd parameter,  0 == position mode, (4, write output to pos 4)
                                   omitted due to being a leading zero
 
-
-
 This instruction multiplies its first two parameters.
   The first parameter, 4 in position mode, works like it did before -
   its value is the value stored at address 4 (33).

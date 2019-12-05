@@ -34,8 +34,8 @@ Your computer is only missing a few opcodes:
   parameter, it stores 1 in the position given by the third parameter.
   Otherwise, it stores 0.
 
-- Opcode 8 is equals: if the first parameter is equal to the second parameter,
-  it stores 1 in the position given by the third parameter.
+- Opcode 8 is equals: if the first parameter is equal to the second
+  parameter, it stores 1 in the position given by the third parameter.
   Otherwise, it stores 0.
 
 Like all instructions, these instructions need to support parameter modes as described above.
