@@ -217,7 +217,7 @@ func (p *Program) Run() error {
 			}
 
 		case OP_LT:
-			var x, y, z int
+			var x, y int
 			switch pC {
 			case "0":
 				a := p.data[pos+1]
@@ -234,7 +234,7 @@ func (p *Program) Run() error {
 				y = p.data[pos+2]
 			}
 
-			z = p.data[pos+3]
+			z := p.data[pos+3]
 			if x < y {
 				p.data[z] = 1
 			} else {
@@ -242,7 +242,7 @@ func (p *Program) Run() error {
 			}
 
 		case OP_EQ:
-			var x, y, z int
+			var x, y int
 			switch pC {
 			case "0":
 				a := p.data[pos+1]
@@ -259,7 +259,7 @@ func (p *Program) Run() error {
 				y = p.data[pos+2]
 			}
 
-			z = p.data[pos+3]
+			z := p.data[pos+3]
 			if x == y {
 				p.data[z] = 1
 			} else {
