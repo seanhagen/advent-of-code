@@ -156,7 +156,7 @@ func (p *Program) Run() error {
 			}
 
 			z := p.data[pos+3]
-			p.data[l] = x * y
+			p.data[z] = x * y
 
 		case OP_SAV:
 			a := p.data[pos+1]
