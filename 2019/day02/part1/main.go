@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/seanhagen/advent-of-code/2019/day02"
+	l2019 "github.com/seanhagen/advent-of-code/2019/lib"
 	"github.com/seanhagen/advent-of-code/lib"
 )
 
@@ -90,7 +90,7 @@ What value is left at position 0 after the program halts?
 
 func main() {
 	f := lib.LoadInput("../input.txt")
-	prog, err := day02.ReadProgram(f)
+	prog, err := l2019.ReadProgram(f)
 	if err != nil {
 		fmt.Printf("unable to read program from file: %v\n", err)
 		os.Exit(1)

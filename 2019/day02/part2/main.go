@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/seanhagen/advent-of-code/2019/day02"
+	l2019 "github.com/seanhagen/advent-of-code/2019/lib2019"
 	"github.com/seanhagen/advent-of-code/lib"
 )
 
@@ -69,7 +69,7 @@ func main() {
 
 	for a = 0; a <= 99; a++ {
 		for b = 0; b <= 99; b++ {
-			prog, err := day02.FromString(string(base))
+			prog, err := l2019.FromString(string(base))
 			if err != nil {
 				fmt.Printf("unable to read program from file: %v\n", err)
 				os.Exit(1)
