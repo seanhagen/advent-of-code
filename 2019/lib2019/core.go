@@ -9,6 +9,8 @@ import (
 	"github.com/seanhagen/advent-of-code/lib"
 )
 
+var ErrHalt = fmt.Errorf("halt instruction reached")
+
 const (
 	OP_ADD = 1
 	OP_MUL = 2
@@ -42,6 +44,7 @@ type Program struct {
 	inputs []int
 
 	outputs []int
+	halted bool
 }
 
 func FromString(in string) (*Program, error) {
@@ -78,6 +81,9 @@ func (p Program) GetOutputs() []int {
 // Run ...
 func (p *Program) Run() error {
 	pos := 0
+	if p.halted {
+		return ErrHalt
+	}
 	max := len(p.data) - 1
 
 	for {
@@ -267,6 +273,7 @@ func (p *Program) Run() error {
 			}
 
 		case OP_FIN:
+			p.halted = true
 			goto done
 
 		default:
