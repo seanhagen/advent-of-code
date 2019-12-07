@@ -44,10 +44,16 @@ type Program struct {
 	inputs []int
 
 	outputs []int
+
+	position int
+
+	pauseOnOutput bool
+
 	halted bool
 }
 
 func FromString(in string) (*Program, error) {
+	in = strings.Replace(in, "\n", "", -1)
 	data := strings.Split(in, ",")
 	prog := Program{code: in, data: []int{}, inPtr: 0, inputs: []int{}, outputs: []int{}}
 	for _, v := range data {
@@ -78,20 +84,24 @@ func (p Program) GetOutputs() []int {
 	return p.outputs
 }
 
+// SetPauseOnOutput ...
+func (p *Program) SetPauseOnOutput(b bool) {
+	p.pauseOnOutput = b
+}
+
 // Run ...
 func (p *Program) Run() error {
-	pos := 0
 	if p.halted {
 		return ErrHalt
 	}
+	pos := p.position
 	max := len(p.data) - 1
-
 	for {
 		op := p.data[pos]
 		opc := strconv.Itoa(op)
 		bits := strings.Split(opc, "")
 
-		pDE, pC, pB, pA := "0", "0", "0", "0"
+		pDE, pC, pB := "0", "0", "0"
 		if len(bits) == 1 {
 			pDE = bits[0]
 		} else if len(bits) >= 2 {
@@ -104,10 +114,6 @@ func (p *Program) Run() error {
 
 		if len(bits) >= 4 {
 			pB = bits[len(bits)-4]
-		}
-
-		if len(bits) >= 5 {
-			pA = bits[len(bits)-5]
 		}
 
 		op, err := strconv.Atoi(pDE)
@@ -123,7 +129,6 @@ func (p *Program) Run() error {
 		switch op {
 		case OP_ADD:
 			var x, y int
-
 			switch pC {
 			case "0":
 				a := p.data[pos+1]
@@ -160,7 +165,6 @@ func (p *Program) Run() error {
 			case "1":
 				y = p.data[pos+2]
 			}
-
 			z := p.data[pos+3]
 			p.data[z] = x * y
 
@@ -176,6 +180,11 @@ func (p *Program) Run() error {
 				p.outputs = append(p.outputs, p.data[a])
 			case "1":
 				p.outputs = append(p.outputs, p.data[pos+1])
+			}
+			if p.pauseOnOutput {
+				pos += incr
+				p.position = pos
+				return nil
 			}
 
 		case OP_JIT:
@@ -280,6 +289,7 @@ func (p *Program) Run() error {
 			return fmt.Errorf("unknown opcode encountered (op: '%v', pos: '%v')", op, pos)
 		}
 		pos += incr
+		p.position = pos
 	}
 
 done:
