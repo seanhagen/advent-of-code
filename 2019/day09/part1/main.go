@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/davecgh/go-spew/spew"
 	l2019 "github.com/seanhagen/advent-of-code/2019/lib2019"
 	"github.com/seanhagen/advent-of-code/lib"
 )
@@ -92,6 +91,14 @@ func main() {
 	}
 
 	out := prog.GetOutputs()
-	fmt.Printf("\n\n")
-	spew.Dump(out)
+	if len(out) == 1 {
+		fmt.Printf("answer: %v\n\n", out[0])
+	} else {
+		fmt.Printf("op codes with issues: \n")
+		for i := 0; i < len(out)-1; i++ {
+			fmt.Printf("\t%v\n", out[i])
+		}
+		fmt.Printf("\n\n")
+	}
+	// spew.Dump(out)
 }
