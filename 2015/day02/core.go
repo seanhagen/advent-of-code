@@ -3,6 +3,7 @@ package day02
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -32,6 +33,23 @@ func GetRequiredSqFt(input string) int {
 	smallest := getSmallest(sides)
 
 	return smallest + (sides[0] * 2) + (sides[1] * 2) + (sides[2] * 2)
+}
+
+func GetRibbonLen(input string) int {
+	parts := inputToIntSlict(input)
+
+	sort.Slice(parts, func(i, j int) bool {
+		if parts[i] < parts[j] {
+			return true
+		}
+		return false
+	})
+
+	a := parts[0]
+	b := parts[1]
+	c := parts[2]
+
+	return (a * 2) + (b * 2) + (a * b * c)
 }
 
 func getSmallest(in []int) int {

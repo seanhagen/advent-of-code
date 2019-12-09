@@ -24,3 +24,23 @@ func TestGetRequiredSqFt(t *testing.T) {
 		})
 	}
 }
+
+func TestGetRibbonLen(t *testing.T) {
+	tests := []struct {
+		input string
+		out   int
+	}{
+		{"2x4x3", 34},
+		{"10x1x1", 14},
+	}
+
+	for i, tt := range tests {
+		x := tt
+		t.Run(fmt.Sprintf("test %v", i), func(t *testing.T) {
+			out := GetRibbonLen(x.input)
+			if out != x.out {
+				t.Errorf("invalid output, expected '%v', got '%v'", x.out, out)
+			}
+		})
+	}
+}
