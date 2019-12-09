@@ -186,9 +186,9 @@ func (p *Program) Run() error {
 			return fmt.Errorf("unable to parse opcode '%v', reason: %v", pDE, err)
 		}
 
-		if op == 1 {
-			fmt.Printf("\n%v -> %v => mode 1st: %v, mode 2nd: %v mode 3rd: %v -- ", opc, opName[op], pC, pB, pA)
-		}
+		// if op == 1 {
+		// 	fmt.Printf("\n%v -> %v => mode 1st: %v, mode 2nd: %v mode 3rd: %v -- ", opc, opName[op], pC, pB, pA)
+		// }
 
 		incr := opIncr[op]
 		if max < (pos + incr - 1) {
@@ -201,15 +201,15 @@ func (p *Program) Run() error {
 			switch pC {
 			case "0":
 				a := p.data[pos+1]
-				fmt.Printf("add, 1st param mode 0 -- ")
+				// fmt.Printf("add, 1st param mode 0 -- ")
 				p.checkMemory(pos, a, pC)
-				fmt.Printf("a: %v", a)
+				// fmt.Printf("a: %v", a)
 				x = p.data[a]
 			case "1":
 				x = p.data[pos+1]
 			case "2":
 				a := p.data[pos+1]
-				fmt.Printf("add, 1st param mode 2 -- ")
+				// fmt.Printf("add, 1st param mode 2 -- ")
 				p.checkMemory(pos, a, pC)
 				x = p.data[p.relBase+a]
 			}
@@ -217,29 +217,28 @@ func (p *Program) Run() error {
 			switch pB {
 			case "0":
 				b := p.data[pos+2]
-				fmt.Printf("add, 2nd param mode 0 -- ")
+				// fmt.Printf("add, 2nd param mode 0 -- ")
 				p.checkMemory(pos, b, pB)
 				y = p.data[b]
 			case "1":
 				y = p.data[pos+2]
 			case "2":
 				b := p.data[pos+2]
-				fmt.Printf("add, 2nd param mode 2! -- ")
+				// fmt.Printf("add, 2nd param mode 2! -- ")
 				p.checkMemory(pos, b, pB)
 				y = p.data[p.relBase+b]
 			}
 
-			fmt.Printf("pos: %v -- ", pos)
+			// fmt.Printf("pos: %v -- ", pos)
 			var z int
 			switch pA {
 			case "0":
 				z = p.data[pos+3]
-				fmt.Printf("%v + %v stored in (%v)", x, y, z)
+				// fmt.Printf("%v + %v stored in (%v)", x, y, z)
 			case "2":
 				z = p.relBase + p.data[pos+3]
 				// fmt.Printf("%v + %v stored in (%v+%v -> %v)", x, y, v, p.relBase, z)
 			}
-
 			p.checkMemory(pos, z, "0")
 			p.data[z] = x + y
 
