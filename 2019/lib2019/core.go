@@ -236,10 +236,8 @@ func (p *Program) Run() error {
 				z = p.data[pos+3]
 				fmt.Printf("%v + %v stored in (%v)", x, y, z)
 			case "2":
-				v := p.data[pos+3]
-				z = p.data[p.relBase+v]
-				fmt.Printf("%v + %v stored in (%v+%v -> %v)", x, y, v, p.relBase, z)
-				fmt.Printf(" ( currently there: %v )", p.data[z])
+				z = p.relBase + p.data[pos+3]
+				// fmt.Printf("%v + %v stored in (%v+%v -> %v)", x, y, v, p.relBase, z)
 			}
 
 			p.checkMemory(pos, z, "0")
@@ -278,8 +276,7 @@ func (p *Program) Run() error {
 			case "0":
 				z = p.data[pos+3]
 			case "2":
-				v := p.data[pos+3]
-				z = p.data[p.relBase+v]
+				z = p.relBase + p.data[pos+3]
 			}
 
 			// z := p.data[pos+3]
@@ -414,8 +411,7 @@ func (p *Program) Run() error {
 			case "0":
 				z = p.data[pos+3]
 			case "2":
-				v := p.data[pos+3]
-				z = p.data[p.relBase+v]
+				z = p.relBase + p.data[pos+3]
 			}
 
 			// z := p.data[pos+3]
@@ -463,8 +459,7 @@ func (p *Program) Run() error {
 				// case "1":
 				z = p.data[pos+3]
 			case "2":
-				v := p.data[pos+3]
-				z = p.data[p.relBase+v]
+				z = p.relBase + p.data[pos+3]
 			}
 			// z := p.data[pos+3]
 			p.checkMemory(pos, z, "0")
