@@ -151,6 +151,15 @@ func (p *Program) Run() error {
 	for {
 		op := p.data[pos]
 		opc := strconv.Itoa(op)
+		if len(opc) < 5 {
+			for {
+				opc = fmt.Sprintf("0%v", opc)
+				if len(opc) == 5 {
+					break
+				}
+			}
+		}
+
 		bits := strings.Split(opc, "")
 		// fmt.Printf("\nop: %v", op)
 		pDE, pC, pB, pA := "0", "0", "0", "0"
@@ -169,7 +178,7 @@ func (p *Program) Run() error {
 		}
 
 		if len(bits) >= 5 {
-			pA = bits[len(bits)-4]
+			pA = bits[len(bits)-5]
 		}
 
 		op, err := strconv.Atoi(pDE)
@@ -177,7 +186,10 @@ func (p *Program) Run() error {
 			return fmt.Errorf("unable to parse opcode '%v', reason: %v", pDE, err)
 		}
 
-		fmt.Printf("\n%v => mode 1st: %v, mode 2nd: %v mode 3rd: %v", opName[op], pC, pB, pA)
+		if op == 1 {
+			fmt.Printf("\n%v -> %v => mode 1st: %v, mode 2nd: %v mode 3rd: %v -- ", opc, opName[op], pC, pB, pA)
+		}
+
 		incr := opIncr[op]
 		if max < (pos + incr - 1) {
 			return fmt.Errorf("not enough data to continue (pos '%v', max '%v')", pos, max)
@@ -189,15 +201,15 @@ func (p *Program) Run() error {
 			switch pC {
 			case "0":
 				a := p.data[pos+1]
-				// fmt.Printf("\n\tadd, 1st param mode 0\n")
+				fmt.Printf("add, 1st param mode 0 -- ")
 				p.checkMemory(pos, a, pC)
-				// fmt.Printf("a: %v\n", a)
+				fmt.Printf("a: %v", a)
 				x = p.data[a]
 			case "1":
 				x = p.data[pos+1]
 			case "2":
 				a := p.data[pos+1]
-				// fmt.Printf("\n\tadd, 1st param mode 2\n")
+				fmt.Printf("add, 1st param mode 2 -- ")
 				p.checkMemory(pos, a, pC)
 				x = p.data[p.relBase+a]
 			}
@@ -205,32 +217,32 @@ func (p *Program) Run() error {
 			switch pB {
 			case "0":
 				b := p.data[pos+2]
-				// fmt.Printf("add, 2nd param mode 0\n")
+				fmt.Printf("add, 2nd param mode 0 -- ")
 				p.checkMemory(pos, b, pB)
 				y = p.data[b]
 			case "1":
 				y = p.data[pos+2]
 			case "2":
 				b := p.data[pos+2]
-				// fmt.Printf("add, 2nd param mode 2!\n")
+				fmt.Printf("add, 2nd param mode 2! -- ")
 				p.checkMemory(pos, b, pB)
 				y = p.data[p.relBase+b]
 			}
 
-			// fmt.Printf("  -- pos: %v", pos)
+			fmt.Printf("pos: %v -- ", pos)
 			var z int
 			switch pA {
 			case "0":
 				z = p.data[pos+3]
-			case "1":
-				fmt.Printf("wat!")
+				fmt.Printf("%v + %v stored in (%v)", x, y, z)
 			case "2":
 				v := p.data[pos+3]
 				z = p.data[p.relBase+v]
+				fmt.Printf("%v + %v stored in (%v+%v -> %v)", x, y, v, p.relBase, z)
+				fmt.Printf(" ( currently there: %v )", p.data[z])
 			}
 
 			p.checkMemory(pos, z, "0")
-			fmt.Printf(" -- %v + %v stored in %v", x, y, z)
 			p.data[z] = x + y
 
 		case OP_MUL:
@@ -265,8 +277,6 @@ func (p *Program) Run() error {
 			switch pA {
 			case "0":
 				z = p.data[pos+3]
-			case "1":
-				fmt.Printf("wat!")
 			case "2":
 				v := p.data[pos+3]
 				z = p.data[p.relBase+v]
@@ -285,13 +295,13 @@ func (p *Program) Run() error {
 			case "0":
 				a = p.data[pos+1]
 			case "2":
-				fmt.Printf(" -- op save, mode rel")
+				// fmt.Printf(" -- op save, mode rel")
 				b := p.data[pos+1]
 				a = p.relBase + b
 			}
 			p.checkMemory(pos, a, pC)
 			p.data[a] = in
-			fmt.Printf(" -- data at %v => %v", a, p.data[a])
+			// fmt.Printf(" -- data at %v => %v", a, p.data[a])
 			p.inPtr++
 
 		case OP_OUT:
@@ -328,7 +338,7 @@ func (p *Program) Run() error {
 				x = p.data[p.relBase+a]
 			}
 
-			fmt.Printf(" -- %v != 0? ", x)
+			// fmt.Printf(" -- %v != 0? ", x)
 			if x != 0 {
 				switch pB {
 				case "0":
@@ -340,7 +350,7 @@ func (p *Program) Run() error {
 					b := p.data[pos+2]
 					y = p.data[p.relBase+b]
 				}
-				fmt.Printf("pos now: %v", y)
+				// fmt.Printf("pos now: %v", y)
 				pos = y
 				continue
 			}
@@ -403,16 +413,13 @@ func (p *Program) Run() error {
 			switch pA {
 			case "0":
 				z = p.data[pos+3]
-			case "1":
-				fmt.Printf("wat!")
-
 			case "2":
 				v := p.data[pos+3]
 				z = p.data[p.relBase+v]
 			}
 
 			// z := p.data[pos+3]
-			fmt.Printf("\nx < y -> %v < %v, z: %v\n", x, y, z)
+			// fmt.Printf("\nx < y -> %v < %v, z: %v\n", x, y, z)
 			p.checkMemory(pos, z, "0")
 			if x < y {
 				p.data[z] = 1
@@ -426,13 +433,13 @@ func (p *Program) Run() error {
 			case "0":
 				a := p.data[pos+1]
 				x = p.data[a]
-				fmt.Printf("arg 1 (pos: %v): %v", a, x)
+				// fmt.Printf("arg 1 (pos: %v): %v", a, x)
 			case "1":
 				x = p.data[pos+1]
-				fmt.Printf("arg 1: %v", x)
+				// fmt.Printf("arg 1: %v", x)
 			case "2":
 				a := p.data[pos+1]
-				fmt.Printf("data at %v+%v", p.relBase, a)
+				// fmt.Printf("data at %v+%v", p.relBase, a)
 				x = p.data[p.relBase+a]
 			}
 
@@ -444,7 +451,7 @@ func (p *Program) Run() error {
 				y = p.data[pos+2]
 			case "2":
 				b := p.data[pos+2]
-				fmt.Printf("data at %v", b)
+				// fmt.Printf("data at %v", b)
 				y = p.data[p.relBase+b]
 			}
 
@@ -461,12 +468,12 @@ func (p *Program) Run() error {
 			}
 			// z := p.data[pos+3]
 			p.checkMemory(pos, z, "0")
-			fmt.Printf(" -- %v == %v? ", x, y)
+			// fmt.Printf(" -- %v == %v? ", x, y)
 			if x == y {
-				fmt.Printf("yes! 1 to %v", z)
+				// fmt.Printf("yes! 1 to %v", z)
 				p.data[z] = 1
 			} else {
-				fmt.Printf("no!  0 to %v", z)
+				// fmt.Printf("no!  0 to %v", z)
 				p.data[z] = 0
 			}
 
@@ -484,7 +491,7 @@ func (p *Program) Run() error {
 			}
 			// a := p.data[pos+1]
 			p.relBase += a
-			fmt.Printf(" -- rel base adjusted by %v, now %v", a, p.relBase)
+			// fmt.Printf(" -- rel base adjusted by %v, now %v", a, p.relBase)
 
 		case OP_FIN:
 			// fmt.Printf("\n\n\n")
