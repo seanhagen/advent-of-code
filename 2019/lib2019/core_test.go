@@ -54,6 +54,7 @@ func TestPrograms(t *testing.T) {
 		{"1,0,0,0,99", []int{2, 0, 0, 0, 99}},
 		{"2,3,0,3,99", []int{2, 3, 0, 6, 99}},
 		{"2,4,4,5,99,0", []int{2, 4, 4, 5, 99, 9801}},
+		//1,1,1,4,99,5,6,0,99
 		{"1,1,1,4,99,5,6,0,99", []int{30, 1, 1, 4, 2, 5, 6, 0, 99}},
 	}
 
@@ -266,4 +267,52 @@ func TestJumpLarge(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestOpAdj(t *testing.T) {
+	tests := []struct {
+		code string
+		out  []int
+	}{
+		{
+			"109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99",
+			[]int{109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99},
+		},
+		{"1102,34915192,34915192,7,4,7,99,0", []int{1219070632396864}},
+		{"104,1125899906842624,99", []int{1125899906842624}},
+	}
+
+	for _, tt := range tests {
+		x := tt
+		t.Run(fmt.Sprintf("input %v", x.code), func(t *testing.T) {
+			p, err := FromString(x.code)
+			if err != nil {
+				t.Fatalf("unable to create program with input '%v', error: %v", x.code, err)
+			}
+
+			err = p.Run()
+			if err != nil {
+				t.Fatalf("failure while running program: %v", err)
+			}
+
+			tmp := p.GetOutputs()
+			if !testArEq(x.out, tmp) {
+				t.Errorf("outputs not equal!\nexpected: %#v\n     got: %#v", x.out, tmp)
+			}
+		})
+	}
+}
+
+func testArEq(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i, _ := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
 }
