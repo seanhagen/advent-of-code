@@ -1,5 +1,14 @@
 package main
 
+import (
+	"fmt"
+	"io"
+	"os"
+
+	"github.com/seanhagen/advent-of-code/2015/day02"
+	"github.com/seanhagen/advent-of-code/lib"
+)
+
 /*
 --- Part Two ---
 
@@ -21,4 +30,19 @@ For example:
 
 */
 
-func main() {}
+func main() {
+	sum := 0
+	f := lib.LoadInput("../input.txt")
+	err := lib.LoopOverLines(f, func(line []byte) error {
+		o := day02.GetRibbonLen(string(line))
+		sum += o
+		return nil
+	})
+
+	if err != nil && err != io.EOF {
+		fmt.Printf("unable to process: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("total ribbon length required: %v\n", sum)
+}
