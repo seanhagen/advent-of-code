@@ -7,11 +7,9 @@ import (
 	"strings"
 )
 
-func GetRequiredSqFt(input string) int {
+func inputToIntSlict(input string) []int {
 	bits := strings.Split(input, "x")
-
 	parts := make([]int, 3)
-
 	for i, v := range bits {
 		j, err := strconv.Atoi(v)
 		if err != nil {
@@ -20,7 +18,11 @@ func GetRequiredSqFt(input string) int {
 		}
 		parts[i] = j
 	}
+	return parts
+}
 
+func GetRequiredSqFt(input string) int {
+	parts := inputToIntSlict(input)
 	sides := []int{
 		parts[0] * parts[1],
 		parts[1] * parts[2],
