@@ -2,13 +2,28 @@ package facing
 
 import (
 	"fmt"
-	"reflect"
 	"sort"
 )
 
 // NewObjFn is the signature of the function used by a Mover to create
 // a new object when it moves
 type NewObjFn func() interface{}
+
+// Config is used when creating a new Mover.
+type Config struct {
+	// StartX is the starting X position of all movers
+	StartX int
+	// StartY is the starting Y position of all movers
+	StartY int
+	// Facing is what direction all movers face at the start
+	Facing Direction
+	// NewObj is a function used to create new things when moving
+	NewObj NewObjFn
+	// Type is used to check that methods are creating the right type of thing
+	Type interface{}
+	// NumMovers controls how many movers are created
+	NumMovers int
+}
 
 // Mover is an object that starts at a given X,Y coordinate (usually 0,0) and then processes
 // instructions to move north, south, east, or west. These instructions can come in one of two forms:
@@ -17,38 +32,15 @@ type NewObjFn func() interface{}
 type Mover struct {
 	things map[int]map[int]interface{}
 
-	x    int
-	xdir int
-	y    int
-	ydir int
+	numMvrs int
+	curMvr  int
+	mvrs    []*mvr
 
-	facing Direction
+	lastX int
+	lastY int
 
 	newObj NewObjFn
 	inType interface{}
-}
-
-// Config is used when creating a new Mover. X & Y are the coordinates of where it starts, and Facing is
-// what direction it starts facing ( default is North ). NewObj is NewObjFn used to create new things
-// when it moves to stand/rest on.
-type Config struct {
-	X      int
-	Y      int
-	Facing Direction
-	NewObj NewObjFn
-	Type   interface{}
-}
-
-func defaultNewObj() interface{} {
-	return "."
-}
-
-var defaultType string
-
-func typeEqual(a, b interface{}) bool {
-	t1 := reflect.TypeOf(a)
-	t2 := reflect.TypeOf(b)
-	return t1 == t2
 }
 
 // NewMover ...
@@ -65,124 +57,61 @@ func NewMover(cnf *Config) (*Mover, error) {
 		return nil, fmt.Errorf("new object function doesn't return same type as config.Type")
 	}
 
-	x, y, f := cnf.X, cnf.Y, cnf.Facing
+	x, y, f := cnf.StartX, cnf.StartY, cnf.Facing
 	th := map[int]map[int]interface{}{
 		x: map[int]interface{}{
 			y: cnf.NewObj(),
 		},
 	}
 
+	numMvr := cnf.NumMovers
+	if numMvr <= 0 {
+		numMvr = 1
+	}
+
+	mvrs := make([]*mvr, numMvr)
+	for i := 0; i < numMvr; i++ {
+		mvrs[i] = &mvr{
+			x:      x,
+			xdir:   Vectors[f][0],
+			y:      y,
+			ydir:   Vectors[f][1],
+			facing: f,
+		}
+	}
+
 	return &Mover{
 		things: th,
 
-		x:    cnf.X,
-		xdir: Vectors[f][0],
-		y:    cnf.Y,
-		ydir: Vectors[f][1],
-
-		facing: f,
+		numMvrs: numMvr,
+		curMvr:  0,
+		mvrs:    mvrs,
 
 		newObj: cnf.NewObj,
 		inType: cnf.Type,
 	}, nil
 }
 
-// Turn takes a direction to turn, then moves forward in the new direction
-func (m *Mover) Turn(i Turn) {
-	f := TurnTo(m.facing, i)
-	m.facing = f
-	m.moveForward()
+// cur ...
+func (m Mover) cur() *mvr {
+	return m.mvrs[m.curMvr]
 }
 
-// Move takes a direction to face, then moves forward
-func (m *Mover) Move(f Direction) {
-	m.facing = f
-	m.moveForward()
-}
-
-// moveForward ...
-func (m *Mover) moveForward() {
-	f := m.facing
-	xdir, ydir := Vectors[f][0], Vectors[f][1]
-	m.xdir = xdir
-	m.ydir = ydir
-	m.x += xdir
-	m.y += ydir
-
-	row, ok := m.things[m.x]
-	if !ok {
-		row = map[int]interface{}{}
-	}
-
-	t, ok := row[m.y]
-	if !ok {
-		t = m.newObj()
-		row[m.y] = t
-		m.things[m.x] = row
+// incr ...
+func (m *Mover) incr() {
+	if m.numMvrs > 1 {
+		m.curMvr++
+		if m.curMvr == m.numMvrs {
+			m.curMvr = 0
+		}
 	}
 }
 
-// GetAt will return the thing stored at X,Y. It will create a new thing
-// by calling the configured NewObj function if nothing exists at that spot.
-func (m Mover) GetAt(x, y int) interface{} {
-	row, ok := m.things[x]
-	if !ok {
-		row = map[int]interface{}{}
-	}
-
-	t, ok := row[y]
-	if !ok {
-		t = m.newObj()
-	}
-
-	return t
-}
-
-// GetCurrent ...
-func (m Mover) GetCurrent() interface{} {
-	return m.GetAt(m.x, m.y)
-}
-
-// SetAt sets the thing at x,y to n. Returns an error if the type of n
-// isn't the same as the type passed in in Config.Type
-func (m *Mover) SetAt(x, y int, n interface{}) error {
-	if !typeEqual(m.inType, n) {
-		return fmt.Errorf("value %#v type %T isn't same type as %T", n, n, m.inType)
-	}
-
-	row, ok := m.things[m.x]
-	if !ok {
-		row = map[int]interface{}{}
-	}
-
-	row[m.y] = n
-	m.things[m.x] = row
-	return nil
-}
-
-// SetCurent ...
-func (m *Mover) SetCurent(n interface{}) error {
-	return m.SetAt(m.x, m.y, n)
-}
-
-// ModifyAt takes an x,y coordinate and a function. The function will be passed
-// the current thing at x,y, and the return value will become the new thing at x,y.
-// Will return an error if the value returned from fn isn't the same type as the
-// value passed in.
-func (m *Mover) ModifyAt(x, y int, fn func(interface{}) interface{}) error {
-	t := m.GetAt(x, y)
-
-	newT := fn(t)
-	if !typeEqual(t, newT) {
-		return fmt.Errorf("modify func returns different type")
-	}
-
-	return m.SetAt(x, y, newT)
-}
-
-// ModifyCurrent ...
-func (m *Mover) ModifyCurrent(fn func(interface{}) interface{}) error {
-	return m.ModifyAt(m.x, m.y, fn)
+// setLast ...
+func (m *Mover) setLast() {
+	mvr := m.cur()
+	m.lastX = mvr.x
+	m.lastY = mvr.y
 }
 
 // Iterate ...

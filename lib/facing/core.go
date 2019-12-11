@@ -1,5 +1,7 @@
 package facing
 
+import "strings"
+
 // Direction is a rune indicating what direction an object is facing
 type Direction rune
 
@@ -14,6 +16,35 @@ const West Direction = '<'
 
 // East is the same as Right in some of the puzzles
 const East Direction = '>'
+
+// DirectionFromString takes a string and returns the direction. Defaults to North if the string
+// doesn't match one of the defined directions
+func DirectionFromString(i string) Direction {
+	switch i {
+	case "v":
+		fallthrough
+	case "V":
+		return South
+
+	case "<":
+		return West
+
+	case ">":
+		return East
+	}
+
+	return North
+}
+
+// DirectionSliceFromString takes a string and treats it as a list of directions
+func DirectionSliceFromString(i string) []Direction {
+	bits := strings.Split(i, "")
+	out := []Direction{}
+	for _, v := range bits {
+		out = append(out, DirectionFromString(v))
+	}
+	return out
+}
 
 // Vectors is a map of Direction -> x,y direction, so Vectors[Up] returns {0,1}.
 // {0,1} means 0 movement in the X plane, and +1 movement in the Y plane.
