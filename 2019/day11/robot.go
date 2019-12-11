@@ -204,11 +204,11 @@ func (r *Robot) ColorPanel(x, y int, c Color) {
 
 // Print ...
 func (r Robot) Print() {
-	minX := 0
-	maxX := 0
+	minX := 10
+	maxX := -10
 
-	minY := 0
-	maxY := 0
+	minY := 10
+	maxY := -10
 
 	for x, col := range r.panels {
 		if x < minX {
@@ -222,10 +222,29 @@ func (r Robot) Print() {
 				minY = y
 			}
 			if y > minY {
-				minY = y
+				maxY = y
 			}
 		}
 	}
 
-	fmt.Printf("min: %v,%v -> max: %v,%v\n", minX, minY, maxX, maxY)
+	fmt.Printf("min: %v,%v -> max: %v,%v\n\n", minX, minY, maxX, maxY)
+
+	for j := 1; j >= -6; j-- {
+		for i := -1; i <= 43; i++ {
+			row := r.panels[i]
+			p, ok := row[j]
+			if !ok {
+				fmt.Printf(" ")
+			} else {
+				if p.color == Black {
+					fmt.Printf("■")
+				} else {
+					fmt.Printf(" ")
+				}
+			}
+		}
+		fmt.Printf(" -- row %v\n", j)
+	}
+	// jzpjragj
+	// JZPJRAGJ
 }
