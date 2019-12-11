@@ -98,30 +98,6 @@ func TestFirstExample(t *testing.T) {
 	}
 }
 
-func TestMoreBetter(t *testing.T) {
-	input := `.#....#####...#..
-##...##.#####..##
-##...#...#.#####.
-..#.........###..
-..#.#.....#....##`
-
-	sf, err := NewStarField(input)
-	if err != nil {
-		t.Fatalf("unable to create starfield: %v", err)
-	}
-
-	station, err := NewAsteroid(8, 3)
-	if err != nil {
-		t.Fatalf("unable to create station: %v", err)
-	}
-
-	sf.SetStation(station)
-
-	sf.LR2(3)
-
-	t.Errorf("not yet")
-}
-
 func TestLaser(t *testing.T) {
 	input := `.#....#####...#..
 ##...##.#####..##
