@@ -126,8 +126,8 @@ func (sf *StarField) LaserRotation(destroy int) error {
 		return fmt.Errorf("argument must be greater than or equal to 1")
 	}
 
+	// setup map of map[angle]map[distance]*Asteroid{}
 	sorted := map[float64]map[float64]*Asteroid{}
-
 	for _, a := range sf.toids {
 		z := sf.station.AngleTo(a)
 		d := sf.station.Distance(a)
@@ -141,17 +141,20 @@ func (sf *StarField) LaserRotation(destroy int) error {
 		sorted[z] = ang
 	}
 
-	xdr, ydr := 0, -1
-	if sf.station.Y == 0 {
+	// find first asteroid, setup
+	xdr, ydr := 0, -1      // laser starts pointing up
+	if sf.station.Y == 0 { // we're on first row, point it right
 		xdr, ydr = 1, 0
 	}
 
 	if sf.station.Y == 0 && sf.station.X == float64(sf.width) {
+		// we're on the first line and on the far right edge, point it down
 		xdr, ydr = 0, 1
 	}
 
 	startX, startY := sf.station.X, sf.station.Y
 
+	// now actually go find the first asteroid
 	var current *Asteroid
 	for {
 		startX += float64(xdr)
@@ -173,18 +176,38 @@ func (sf *StarField) LaserRotation(destroy int) error {
 		}
 	}
 
+	// some setup
 	angle := sf.station.AngleTo(current)
+	dist := sf.station.Distance(current)
+
+	// remove first asteroid
+	aset := sorted[angle]
+	delete(aset, dist)
+
+	// if set now has zero asteroids, remove set ( delete(sorted[angle]))
+	if len(aset) == 0 {
+		delete(sorted, angle)
+	}
 
 	destroyed := []*Asteroid{}
 	toids := []*Asteroid{}
 	for _, a := range sf.toids {
-		if !sf.station.Equals(a) {
+		if !sf.station.Equals(a) && !current.Equals(a) {
 			// remove station from list of asteroids
 			toids = append(toids, a)
 		}
 	}
 
+	if len(sorted) == 0 {
+		// we're already done!
+		sf.toids = toids
+		sf.destroyed = append(sf.destroyed, current)
+		return nil
+	}
+
 	for i := 1; i <= destroy; i++ {
+		// fmt.Printf("%v -> removing asteroid @ (%v, %v -- angle: %v)\n", i, current.X, current.Y, angle)
+
 		// remove current from toids
 		tmp := []*Asteroid{}
 		for _, a := range toids {
@@ -203,6 +226,7 @@ func (sf *StarField) LaserRotation(destroy int) error {
 				angChk = append(angChk, a)
 			}
 		}
+
 		//   (if no next biggest, set angle to -pi then check again)
 		if len(angChk) == 0 {
 			angle = -1 * math.Pi
@@ -264,9 +288,3 @@ func (sf *StarField) Reset() {
 	sf.destroyed = []*Asteroid{}
 	sf.toids = asteroids
 }
-
-// func remove(s []int, i int) []int {
-// 	s[i] = s[len(s)-1]
-// 	// We do not need to put s[i] at the end, as it will be discarded anyway
-// 	return s[:len(s)-1]
-// }

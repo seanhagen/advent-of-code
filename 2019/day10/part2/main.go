@@ -103,4 +103,10 @@ func main() {
 	fmt.Printf("best astroid located at %v,%v -- can see %v\n\n", a.X, a.Y, a.See)
 
 	sf.SetStation(a)
+
+	sf.LaserRotation(200)
+
+	d := sf.GetDestroyed(200)
+
+	fmt.Printf("bet: %v\n", d.X*100+d.Y)
 }

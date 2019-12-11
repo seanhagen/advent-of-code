@@ -5,6 +5,43 @@ import (
 	"testing"
 )
 
+func TestOneToDestroy(t *testing.T) {
+	input := `.#.
+...`
+
+	sx, sy := 1, 1
+
+	sf, err := NewStarField(input)
+	if err != nil {
+		t.Fatalf("unable to create starfield: %v", err)
+	}
+
+	station, err := NewAsteroid(sx, sy)
+	if err != nil {
+		t.Fatalf("unable to create station: %v", err)
+	}
+
+	sf.SetStation(station)
+
+	err = sf.LaserRotation(1)
+	if err != nil {
+		t.Fatalf("unable to run laser: %v", err)
+	}
+
+	if len(sf.toids) > 0 {
+		t.Errorf("only one asteroid, should have been deleted")
+	}
+
+	if len(sf.destroyed) == 0 {
+		t.Errorf("deleted asteroid should be in slice, isn't")
+	}
+
+	if len(sf.destroyed) != 1 {
+		t.Errorf("should only be one asteroid, got: %v", len(sf.destroyed))
+	}
+
+}
+
 func TestFirstExample(t *testing.T) {
 	tests := []struct {
 		input string
@@ -291,13 +328,9 @@ func TestRemoveAll(t *testing.T) {
 		t.Fatalf("unable to do laser rotation: %v", err)
 	}
 
-	for i := 1; i < len(sf.toids); i++ {
-		d := sf.GetDestroyed(i)
-		if d.X == 8 && d.Y == 2 {
-			fmt.Printf("destroyed %v: (%v,%v)\n", i, d.X, d.Y)
-		}
-
+	d := sf.GetDestroyed(200)
+	expect, _ := NewAsteroid(8, 2)
+	if !expect.Equals(d) {
+		t.Errorf("destroyed in wrong order, expected asteroid 200 to be (%v,%v), got (%v,%v)", expect.X, expect.Y, d.X, d.Y)
 	}
-
-	t.Errorf("nope")
 }
