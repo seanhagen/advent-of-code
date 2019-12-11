@@ -1,5 +1,11 @@
 package main
 
+import (
+	"fmt"
+
+	"github.com/seanhagen/advent-of-code/2015/day04"
+)
+
 /*
 --- Day 4: The Ideal Stocking Stuffer ---
 
@@ -21,4 +27,7 @@ If your secret key is pqrstuv, the lowest number it combines with to make an MD5
 Your puzzle input is ckczppom.
 */
 
-func main() {}
+func main() {
+	i, _ := day04.FindHash("ckczppom", 5)
+	fmt.Printf("answer: %v\n", i)
+}
