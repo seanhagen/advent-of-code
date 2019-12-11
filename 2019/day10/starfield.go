@@ -5,8 +5,6 @@ import (
 	"math"
 	"sort"
 	"strings"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 // TypeAsteroid contains the character used to denote an asteroid in a map
@@ -119,7 +117,7 @@ func (sf *StarField) GetDestroyed(n int) *Asteroid {
 }
 
 // LR2 ...
-func (sf *StarField) LR2(destroy int) error {
+func (sf *StarField) LaserRotation(destroy int) error {
 	if sf.station == nil {
 		return fmt.Errorf("set a station before calling this function")
 	}
@@ -250,157 +248,6 @@ func (sf *StarField) LR2(destroy int) error {
 	sf.toids = toids
 	sf.destroyed = append(sf.destroyed, destroyed...)
 
-	// os.Exit(1)
-
-	return nil
-}
-
-// LaserRotation ...
-func (sf *StarField) LaserRotation(destroy int) error {
-	if sf.station == nil {
-		return fmt.Errorf("set a station before calling this function")
-	}
-
-	var furthest *Asteroid
-	dist := 0.0
-	for _, a := range sf.toids {
-		d := sf.station.Distance(a)
-		if d > dist {
-			furthest = a
-			dist = d
-		}
-	}
-
-	fmt.Printf("station furthest from station at (%v, %v) is station at (%v, %v) with a distance of %v\n", sf.station.X, sf.station.Y, furthest.X, furthest.Y, dist)
-
-	// get laser
-	lzr, err := sf.station.LaserLine(dist * 2.0)
-	if err != nil {
-		return err
-	}
-
-	// get copy of list of asteroids
-	toids := []*Asteroid{}
-	for _, a := range sf.toids {
-		if !sf.station.Equals(a) {
-			// remove station from list of asteroids
-			toids = append(toids, a)
-		}
-	}
-
-	// create empty 'destroyed' slice
-	destroyed := []*Asteroid{}
-
-	fmt.Printf("destroying %v asteroids!\n", destroy)
-
-	for {
-		//   get all the astroids that intersect with the laser
-		onl := []*Asteroid{}
-		for _, a := range toids {
-			if lzr.OnLine(a) {
-				onl = append(onl, a)
-			}
-		}
-
-		fmt.Printf("found %v asteroids on laser heading (%v,%v -> %v,%v)\n", len(onl), lzr.a.X, lzr.a.Y, lzr.b.X, lzr.b.Y)
-
-		if len(onl) != 0 {
-			fmt.Printf("found at least one asteroid:\n%v\n", spew.Sdump(onl))
-
-			//   find the closest to the station
-			var close *Asteroid
-			dist := 1000000.0
-			for _, a := range onl {
-				d := sf.station.Distance(a)
-				if d < dist {
-					close = a
-					dist = d
-				}
-			}
-
-			fmt.Printf("closest asteroid is %v\n", close)
-
-			//   'destroy' it ( append to destroyed slice, remove from copy list )
-			destroyed = append(destroyed, close)
-			nt := []*Asteroid{}
-			for _, v := range toids {
-				if !close.Equals(v) {
-					nt = append(nt, v)
-				}
-			}
-			toids = nt
-
-			fmt.Printf("toids: %v, destroyed: %v, to destroy: %v\n", len(toids), len(destroyed), destroy)
-
-			// rotate until we get an asteroid that's not currently in the laser's path
-			if len(onl) > 1 {
-				fmt.Printf("more than one asteroid in laser path, rotating until new asteroid shows up\n")
-				ignore := []*Asteroid{}
-				for _, v := range onl {
-					if !close.Equals(v) {
-						ignore = append(ignore, v)
-					}
-				}
-				fmt.Printf("asteroids in path: \n%v\n", spew.Sdump(ignore))
-
-				fmt.Printf("there are %v other asteroids\n", len(ignore))
-
-				for {
-					onl := []*Asteroid{}
-					for _, a := range toids {
-						if lzr.OnLine(a) {
-							onl = append(onl, a)
-						}
-					}
-
-					still := false
-					for _, a := range onl {
-						for _, b := range ignore {
-							if a.Equals(b) {
-								fmt.Printf("whoops, asteroid %v,%v in ignore\n", a.X, a.Y)
-								still = true
-								break
-							}
-						}
-						if still {
-							break
-						}
-					}
-
-					if !still {
-						fmt.Printf("no more ignored asteroids on line, goooooood to go!\n")
-						break
-					}
-					fmt.Printf("still need to rotate, doing that\n")
-					lzr.Rotate()
-				}
-				fmt.Printf("will now go back to start of loooooooop\n")
-				// os.Exit(1)
-				continue
-			}
-		} else {
-			fmt.Printf("no asteroids on line\n")
-		}
-
-		if len(toids) == 0 {
-			break
-		}
-
-		if len(destroyed) == destroy {
-			break
-		}
-
-		//   rotate laser!
-		lzr.Rotate()
-	}
-
-	// update starfield
-	//   set list of asteroids
-	sf.toids = toids
-	//   set list of destroyed
-	sf.destroyed = destroyed
-
-	// spew.Dump(sf)
 	// os.Exit(1)
 
 	return nil
