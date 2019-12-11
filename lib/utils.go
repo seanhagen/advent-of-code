@@ -3,9 +3,28 @@ package lib
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 )
 
+// GetString ...
+func GetString(path string) (string, error) {
+	// f := LoadInput(path)
+
+	bits, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	// l, err := ReadLine(f)
+	// if err != nil {
+	// 	return "", err
+	// }
+	return string(bits), nil
+}
+
+// LoadInput returns an *os.File for use with LoopOverLines. If the file
+// cannot be found it will print the error and then call os.Exit(1)
 func LoadInput(path string) *os.File {
 	f, err := os.Open(path)
 	if err != nil {
@@ -15,6 +34,7 @@ func LoadInput(path string) *os.File {
 	return f
 }
 
+// LoopOverLines takes a file, and then calls the provided file on each line
 func LoopOverLines(file *os.File, fn func(line []byte) error) error {
 	r := bufio.NewReader(file)
 	line, _, err := r.ReadLine()
