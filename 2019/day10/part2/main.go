@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+
+	"github.com/seanhagen/advent-of-code/2019/day10"
 )
 
 /*
@@ -84,6 +87,20 @@ The 299th and final asteroid to be vaporized is at 11,1.
 */
 
 func main() {
-	fmt.Printf("nope!\n")
-	os.Exit(1)
+	code, err := ioutil.ReadFile("../input.txt")
+	if err != nil {
+		fmt.Printf("unable to read input: %v\n", err)
+		os.Exit(1)
+	}
+
+	sf, err := day10.NewStarField(string(code))
+	if err != nil {
+		fmt.Printf("unable to create starfield map: %v\n", err)
+		os.Exit(1)
+	}
+
+	a := sf.FindBest()
+	fmt.Printf("best astroid located at %v,%v -- can see %v\n\n", a.X, a.Y, a.See)
+
+	sf.SetStation(a)
 }
