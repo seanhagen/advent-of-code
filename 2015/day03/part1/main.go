@@ -1,5 +1,13 @@
 package main
 
+import (
+	"fmt"
+	"os"
+
+	"github.com/seanhagen/advent-of-code/2015/day03"
+	"github.com/seanhagen/advent-of-code/lib"
+)
+
 /*
 
 --- Day 3: Perfectly Spherical Houses in a Vacuum ---
@@ -29,4 +37,24 @@ For example:
 
 */
 
-func main() {}
+func main() {
+	ins, err := lib.GetString("../input.txt")
+	if err != nil {
+		fmt.Printf("unable to load instructions: %v\n", err)
+		os.Exit(1)
+	}
+
+	sta, err := day03.NewSanta(ins, 1)
+	if err != nil {
+		fmt.Printf("unable to create Santa: %v\n", err)
+		os.Exit(1)
+	}
+
+	err = sta.Go()
+	if err != nil {
+		fmt.Printf("error delivering presents: %v\n", err)
+	}
+
+	v := sta.Visited()
+	fmt.Printf("santa visited %v houses\n", v)
+}
