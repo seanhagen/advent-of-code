@@ -3,6 +3,7 @@ package lib
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 )
@@ -45,6 +46,11 @@ func LoopOverLines(file *os.File, fn func(line []byte) error) error {
 			os.Exit(1)
 		}
 	}
+
+	if err == io.EOF {
+		return nil
+	}
+
 	return err
 }
 

@@ -1,8 +1,12 @@
 package main
 
 import (
-  "fmt"
-  "os"
+	"fmt"
+	"os"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/seanhagen/advent-of-code/2019/day12"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 /*
@@ -217,7 +221,31 @@ What is the total energy in the system after simulating the moons given in your 
 
 */
 
-func main(){
-  fmt.Printf("nope!\n")
-  os.Exit(1)
+func main() {
+	f := lib.LoadInput("../input.txt")
+
+	sys := day12.NewSystem()
+
+	err := lib.LoopOverLines(f, func(line []byte) error {
+		return sys.AddPlanet(string(line))
+	})
+
+	if err != nil {
+		fmt.Printf("unable to process input: %v\n", err)
+		os.Exit(1)
+	}
+
+	err = sys.SetupPairs()
+	if err != nil {
+		fmt.Printf("unable to setup pairs: %v\n", err)
+		os.Exit(1)
+	}
+
+	sys.DoSteps(1000)
+
+	e := sys.CalculateTotalEnergy()
+
+	spew.Dump(sys)
+
+	fmt.Printf("total energy: %v\n", e)
 }

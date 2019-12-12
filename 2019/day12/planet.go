@@ -30,6 +30,9 @@ type Planet struct {
 	name string
 	pos  Vec
 	vel  Vec
+
+	initialPos Vec
+	initialVel Vec
 }
 
 // CreatePlanet takes an index and position string
@@ -44,7 +47,7 @@ func CreatePlanet(idx int, in string) (*Planet, error) {
 		name = names[idx]
 	}
 
-	return &Planet{name: name, pos: v}, nil
+	return &Planet{name: name, pos: v, initialPos: v}, nil
 }
 
 // Step ...
@@ -53,8 +56,8 @@ func (p *Planet) Step() {
 }
 
 // Eq ...
-func (p Planet) Eq(v Vec) bool {
-	return p.pos.Eq(v)
+func (p Planet) Eq(p2 Planet) bool {
+	return p.pos.Eq(p2.pos) && p.vel.Eq(p2.vel)
 }
 
 // String ...
@@ -73,4 +76,9 @@ func (p Planet) TotalEnergy() int {
 	b := p.vel.Energy()
 
 	return a * b
+}
+
+// AtStart ...
+func (p Planet) AtStart() bool {
+	return p.pos.Eq(p.initialPos) && p.vel.Eq(p.initialVel)
 }
