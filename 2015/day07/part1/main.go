@@ -1,8 +1,8 @@
 package main
 
 import (
-  "fmt"
-  "os"
+	"fmt"
+	"os"
 )
 
 /*
@@ -61,9 +61,11 @@ y: 456
 In little Bobby's kit's instructions booklet (provided as your puzzle input), what signal is
 ultimately provided to wire a?
 
+Hints: https://medium.com/learning-the-go-programming-language/bit-hacking-with-go-e0acee258827
+
 */
 
-func main(){
-  fmt.Printf("nope!\n")
-  os.Exit(1)
+func main() {
+	fmt.Printf("nope!\n")
+	os.Exit(1)
 }
