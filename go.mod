@@ -2,6 +2,7 @@ module github.com/seanhagen/advent-of-code
 
 require (
 	github.com/PuerkitoBio/goquery v1.5.0
+	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
 	github.com/antchfx/htmlquery v1.2.0 // indirect
 	github.com/antchfx/xmlquery v1.2.1 // indirect
 	github.com/antchfx/xpath v1.1.2 // indirect
