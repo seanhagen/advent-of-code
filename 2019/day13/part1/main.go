@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/seanhagen/advent-of-code/2019/day13"
 	"github.com/seanhagen/advent-of-code/2019/lib2019"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 /*
