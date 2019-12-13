@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/seanhagen/advent-of-code/2015/day07"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 /*
@@ -66,6 +69,32 @@ Hints: https://medium.com/learning-the-go-programming-language/bit-hacking-with-
 */
 
 func main() {
-	fmt.Printf("nope!\n")
-	os.Exit(1)
+	brd, err := day07.NewBoard()
+	if err != nil {
+		fmt.Printf("unable to create wire board: %v\n", err)
+		os.Exit(1)
+	}
+
+	file := "../input.txt"
+	// file := "../sorted.txt"
+	i := 0
+	err = lib.LoadAndLoop(file, func(in string) error {
+		i++
+		return brd.AddWire(in)
+	})
+	fmt.Printf("processed %v lines\n", i)
+
+	if err != nil {
+		fmt.Printf("unable to load input: %v\n", err)
+		os.Exit(1)
+	}
+
+	a := brd.GetWire("a").Value()
+	if a == nil {
+		fmt.Printf("no value for a?\n")
+		os.Exit(1)
+	}
+
+	fmt.Printf("value: %v\n", *a)
+
 }

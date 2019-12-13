@@ -7,10 +7,7 @@ import (
 )
 
 var reWire = regexp.MustCompile(`^[a-z]{1,2}\s?->\s?[a-z]{1,2}`)
-var scWire = "%s -> %s"
-
 var reInput = regexp.MustCompile(`^[\d]+ -> [a-z]{1,2}`)
-var scInput = "%d -> %s"
 
 // Board ...
 type Board struct {
@@ -36,91 +33,80 @@ func (b *Board) findOrCreateWire(n string) *Wire {
 		value:   nil,
 	}
 	b.wires[n] = w
-
 	return w
 }
 
 // AddWire ...
 func (b *Board) AddWire(in string) error {
 	in = strings.TrimSpace(in)
-
 	if strings.Contains(in, string(OpAnd)) {
-		fmt.Printf("AND\n")
-		return nil
+		return b.addAnd(in)
 	}
 
 	if strings.Contains(in, string(OpOr)) {
-		fmt.Printf("OR\n")
-		return nil
+		return b.addOr(in)
 	}
 
 	if strings.Contains(in, string(OpNot)) {
-		fmt.Printf("NOT\n")
-		return nil
+		return b.addNot(in)
 	}
 
 	if strings.Contains(in, string(OpLShift)) {
-		fmt.Printf("LSHIFT\n")
-		return nil
+		return b.addLShift(in)
 	}
 
 	if strings.Contains(in, string(OpRShift)) {
-		fmt.Printf("RSHIFT\n")
-		return nil
+		return b.addRShift(in)
 	}
 
+	// lastly, check if it's an input instruction
 	if reInput.MatchString(in) || reWire.MatchString(in) {
-		fmt.Printf("\n\n'%v' matched input regexes\n\n", in)
 		return b.addInput(in)
 	}
 
 	return fmt.Errorf("input matched no known instructions")
 }
 
-// addInput ...
-func (b *Board) addInput(in string) error {
-	var val uint16
-	dest := ""
-	inw := ""
-	_, err := fmt.Sscanf(in, scInput, &val, &dest)
-	if err != nil {
-		_, err = fmt.Sscanf(in, scWire, &inw, &dest)
-		if err != nil {
-			return err
+// GetWireValues ...
+func (b Board) GetWireValues() map[string]uint16 {
+	out := map[string]uint16{}
+
+	for n, w := range b.wires {
+		v := w.Value()
+		if v != nil {
+			out[n] = *v
 		}
 	}
 
-	op := Input{}
-	if inw == "" {
-		op.argVal = &val
-	} else {
-		opw := b.findOrCreateWire(inw)
-		op.argWire = opw
-	}
-
-	dw := b.findOrCreateWire(dest)
-	if dit := dw.input.Type(); dit != OpNull {
-		return fmt.Errorf("output wire '%v' already has an input (type: '%v')", dest, dit)
-	}
-
-	dw.input = op
-	op.output = dw
-
-	// try getting the value for the destination wire, just in case it's completable now
-	_ = dw.Value()
-
-	return nil
-	// var x uint16 = 3
-	// fmt.Printf("%b\n", x)
-	// fmt.Printf("%b\n", ^x)
-
-	// spew.Dump(val, dest, inw)
-	// return fmt.Errorf("invalid input")
+	return out
 }
 
-// GetWireValues ...
-func (b Board) GetWireValues() map[string]int16 {
-	out := map[string]int16{}
+// Reset ...
+func (b *Board) Reset() {
+	for n, w := range b.wires {
+		w.value = nil
+		b.wires[n] = w
+	}
+}
 
-	return out
+// SetWireValue ...
+func (b *Board) SetWireValue(n string, v int) error {
+	w, ok := b.wires[n]
+	if !ok {
+		return fmt.Errorf("no wire named '%v'")
+	}
+
+	uv := uint16(v)
+	w.value = &uv
+	b.wires[n] = w
+
+	return nil
+}
+
+// GetWire ...
+func (b Board) GetWire(n string) *Wire {
+	if w, ok := b.wires[n]; ok {
+		return w
+	}
+	return nil
 }
