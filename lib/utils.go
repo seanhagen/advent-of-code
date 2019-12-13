@@ -42,8 +42,9 @@ func LoopOverLines(file *os.File, fn func(line []byte) error) error {
 	for ; err == nil; line, _, err = r.ReadLine() {
 		x := fn(line)
 		if x != nil {
-			fmt.Printf("\n\ngot error: %v\n", x)
-			os.Exit(1)
+			return err
+			// fmt.Printf("\n\ngot error: %v\n", x)
+			// os.Exit(1)
 		}
 	}
 
@@ -52,6 +53,24 @@ func LoopOverLines(file *os.File, fn func(line []byte) error) error {
 	}
 
 	return err
+}
+
+// LoadAndLoop ...
+func LoadAndLoop(path string, fn func(ln string) error) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	err = LoopOverLines(f, func(in []byte) error {
+		return fn(string(in))
+	})
+
+	if err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
 }
 
 // ReadLine reads a single line from the input file
