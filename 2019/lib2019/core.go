@@ -9,55 +9,60 @@ import (
 	"github.com/seanhagen/advent-of-code/lib"
 )
 
+// ErrHalt is returned when the Program reaches the Halt instruction
 var ErrHalt = fmt.Errorf("halt instruction reached")
 
 const (
-	OP_ADD = 1
-	OP_MUL = 2
-	OP_SAV = 3
-	OP_OUT = 4
-	OP_JIT = 5
-	OP_JIF = 6
-	OP_LT  = 7
-	OP_EQ  = 8
-	OP_ADJ = 9
+	// OpAdd is the intcode for the add instruction
+	OpAdd = 1
+	// OpMul is the intcode for the multiply instruction
+	OpMul = 2
+	// OpSav is the intcode for the save/input instruction ( read from input and save to memory )
+	OpSav = 3
+	// OpOut is the intcode for the output instruction
+	OpOut = 4
+	// OpJit is the intcode for the "jump-if-true" instruction
+	OpJit = 5
+	// OpJif is the intcode for the "jump-if-false" instruction
+	OpJif = 6
+	// OpLt is the less-than instruction
+	OpLt = 7
+	// OpEq is the equal instruction
+	OpEq = 8
+	// OpAdj is the adjust relative base instruction
+	OpAdj = 9
 
-	OP_FIN = 99
+	// OpHalt is the halt instruction
+	OpHalt = 99
 )
 
-/*
-21101 ADD,
-21102 MUL,
-21107 LT,
-21108 EQ,
-*/
-
 var opName = map[int]string{
-	OP_ADD: "ADD",
-	OP_MUL: "MUL",
-	OP_SAV: "SAV",
-	OP_OUT: "OUT",
-	OP_JIT: "JIT",
-	OP_JIF: "JIF",
-	OP_LT:  "LT ",
-	OP_EQ:  "EQ ",
-	OP_ADJ: "ADJ",
-	OP_FIN: "FIN",
+	OpAdd:  "ADD",
+	OpMul:  "MUL",
+	OpSav:  "SAV",
+	OpOut:  "OUT",
+	OpJit:  "JIT",
+	OpJif:  "JIF",
+	OpLt:   "LT ",
+	OpEq:   "EQ ",
+	OpAdj:  "ADJ",
+	OpHalt: "FIN",
 }
 
 var opIncr = map[int]int{
-	OP_ADD: 4,
-	OP_MUL: 4,
-	OP_SAV: 2,
-	OP_OUT: 2,
-	OP_JIT: 3,
-	OP_JIF: 3,
-	OP_LT:  4,
-	OP_EQ:  4,
-	OP_ADJ: 2,
-	OP_FIN: 1,
+	OpAdd:  4,
+	OpMul:  4,
+	OpSav:  2,
+	OpOut:  2,
+	OpJit:  3,
+	OpJif:  3,
+	OpLt:   4,
+	OpEq:   4,
+	OpAdj:  2,
+	OpHalt: 1,
 }
 
+// Program is an intcode program
 type Program struct {
 	code     string
 	data     []int
@@ -73,13 +78,15 @@ type Program struct {
 	halted        bool
 }
 
+// FromString reads a program code from the string input
 func FromString(in string) (*Program, error) {
 	in = strings.Replace(in, "\n", "", -1)
 	data := strings.Split(in, ",")
 	prog := Program{code: in, data: []int{}, inPtr: 0, inputs: []int{}, outputs: []int{}}
-	for _, v := range data {
+	for x, v := range data {
 		i, err := strconv.Atoi(v)
 		if err != nil {
+			fmt.Printf("\ninstruction %v: '%v'\n", x, v)
 			return nil, err
 		}
 		prog.data = append(prog.data, i)
@@ -87,6 +94,7 @@ func FromString(in string) (*Program, error) {
 	return &prog, nil
 }
 
+// ReadProgram reads the program code from the file
 func ReadProgram(f *os.File) (*Program, error) {
 	d, err := lib.ReadLine(f)
 	if err != nil {
@@ -95,12 +103,17 @@ func ReadProgram(f *os.File) (*Program, error) {
 	return FromString(string(d))
 }
 
+// Unhalt ...
+func (p *Program) Unhalt() {
+	p.halted = false
+}
+
 // AddInput ...
 func (p *Program) AddInput(in int) {
 	p.inputs = append(p.inputs, in)
 }
 
-// GetOutput ...
+// GetOutputs ...
 func (p Program) GetOutputs() []int {
 	return p.outputs
 }
@@ -196,7 +209,7 @@ func (p *Program) Run() error {
 		}
 
 		switch op {
-		case OP_ADD:
+		case OpAdd:
 			var x, y int
 			switch pC {
 			case "0":
@@ -242,7 +255,7 @@ func (p *Program) Run() error {
 			p.checkMemory(pos, z, "0")
 			p.data[z] = x + y
 
-		case OP_MUL:
+		case OpMul:
 			var x, y int
 			switch pC {
 			case "0":
@@ -283,7 +296,13 @@ func (p *Program) Run() error {
 			// fmt.Printf(" -- %v * %v stored in %v", x, y, z)
 			p.data[z] = x * y
 
-		case OP_SAV:
+		case OpSav:
+			// fmt.Printf("trying to read from %v, inputs: %#v\n", p.inPtr, p.inputs)
+			if len(p.inputs)-1 < p.inPtr {
+				// fmt.Printf("not enough input, returning for now\n")
+				goto done
+			}
+
 			in := p.inputs[p.inPtr]
 
 			var a int
@@ -300,7 +319,7 @@ func (p *Program) Run() error {
 			// fmt.Printf(" -- data at %v => %v", a, p.data[a])
 			p.inPtr++
 
-		case OP_OUT:
+		case OpOut:
 			switch pC {
 			case "0":
 				a := p.data[pos+1]
@@ -321,7 +340,7 @@ func (p *Program) Run() error {
 				return nil
 			}
 
-		case OP_JIT:
+		case OpJit:
 			x, y := 0, 0
 			switch pC {
 			case "0":
@@ -351,7 +370,7 @@ func (p *Program) Run() error {
 				continue
 			}
 
-		case OP_JIF:
+		case OpJif:
 			x, y := 0, 0
 			switch pC {
 			case "0":
@@ -381,7 +400,7 @@ func (p *Program) Run() error {
 				continue
 			}
 
-		case OP_LT:
+		case OpLt:
 			var x, y int
 			switch pC {
 			case "0":
@@ -422,7 +441,7 @@ func (p *Program) Run() error {
 				p.data[z] = 0
 			}
 
-		case OP_EQ:
+		case OpEq:
 			var x, y int
 			switch pC {
 			case "0":
@@ -471,7 +490,7 @@ func (p *Program) Run() error {
 				p.data[z] = 0
 			}
 
-		case OP_ADJ:
+		case OpAdj:
 			var a int
 			switch pC {
 			case "0":
@@ -487,9 +506,11 @@ func (p *Program) Run() error {
 			p.relBase += a
 			// fmt.Printf(" -- rel base adjusted by %v, now %v", a, p.relBase)
 
-		case OP_FIN:
+		case OpHalt:
 			// fmt.Printf("\n\n\n")
 			p.halted = true
+			pos += incr
+			p.position = pos
 			goto done
 
 		default:
