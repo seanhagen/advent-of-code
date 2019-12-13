@@ -25,8 +25,8 @@ func NewRobot(input string) (*Robot, error) {
 	}
 
 	cnf := facing.Config{
-		X:      0,
-		Y:      0,
+		StartX: 0,
+		StartY: 0,
 		Facing: facing.North,
 		NewObj: newPanelFn,
 		Type:   Panel{},
