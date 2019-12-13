@@ -54,8 +54,14 @@ func LoopOverLines(file *os.File, fn func(line []byte) error) error {
 	return err
 }
 
+// ReadLine reads a single line from the input file
 func ReadLine(file *os.File) ([]byte, error) {
 	r := bufio.NewReader(file)
-	line, _, err := r.ReadLine()
-	return line, err
+	fi, err := file.Stat()
+	if err != nil {
+		return []byte{}, err
+	}
+	out := make([]byte, fi.Size())
+	_, err = r.Read(out)
+	return out, err
 }
