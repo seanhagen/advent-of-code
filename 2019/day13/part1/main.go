@@ -45,13 +45,8 @@ Start the game. How many block tiles are on the screen when the game exits?
 */
 
 func main() {
-	code, err := ioutil.ReadFile("../input.txt")
-	if err != nil {
-		fmt.Printf("unable to read input: %v\n", err)
-		os.Exit(1)
-	}
-
-	prog, err := lib2019.FromString(string(code))
+	f := lib.LoadInput("../input.txt")
+	prog, err := lib2019.ReadProgram(f)
 	if err != nil {
 		fmt.Printf("unable to create program: %v\n", err)
 		os.Exit(1)

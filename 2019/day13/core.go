@@ -1,6 +1,8 @@
 package day13
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Tile is a tile in the game
 type Tile string
@@ -37,6 +39,11 @@ type Game struct {
 
 	minY int
 	maxY int
+
+	score int
+
+	bX int
+	pX int
 }
 
 // NewGame ...
@@ -61,6 +68,11 @@ func NewGame(input []int) (*Game, error) {
 
 // SetTile ...
 func (g *Game) SetTile(x, y, t int) {
+	if x == -1 && y == 0 {
+		g.score = t
+		return
+	}
+
 	row, ok := g.screen[y]
 	if !ok {
 		row = map[int]Tile{}
@@ -73,6 +85,14 @@ func (g *Game) SetTile(x, y, t int) {
 
 	row[x] = tile
 	g.screen[y] = row
+
+	if tile == PaddleTile {
+		g.pX = x
+	}
+
+	if tile == BallTile {
+		g.bX = x
+	}
 
 	if x > g.maxX {
 		g.maxX = x
@@ -99,4 +119,35 @@ func (g Game) CountTileType(t Tile) int {
 		}
 	}
 	return sum
+}
+
+// Print ...
+func (g Game) Print() {
+	fmt.Printf("Score: %v\n", g.score)
+
+	for j := g.minY; j <= g.maxY; j++ {
+		for i := g.minX; i <= g.maxX; i++ {
+			t, ok := g.screen[j][i]
+			if !ok {
+				t = EmptyTile
+			}
+			fmt.Printf("%v", t)
+		}
+		fmt.Printf("\n")
+	}
+}
+
+// GetBallPosition ...
+func (g Game) GetBallPosition() int {
+	return g.bX
+}
+
+// GetPaddlePosition ...
+func (g Game) GetPaddlePosition() int {
+	return g.pX
+}
+
+// GetScore ...
+func (g Game) GetScore() int {
+	return g.score
 }
