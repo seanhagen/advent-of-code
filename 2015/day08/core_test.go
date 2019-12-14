@@ -45,3 +45,44 @@ func TestMemTotal(t *testing.T) {
 		})
 	}
 }
+
+func TestEncodeLength(t *testing.T) {
+	tests := []struct {
+		input  string
+		length int
+	}{
+		{`""`, 6},
+		{`"abc"`, 9},
+		{`"aaa\"aaa"`, 16},
+		{`"\x27"`, 11},
+	}
+
+	for i, x := range tests {
+		tt := x
+		t.Run(fmt.Sprintf("test %v", i), func(t *testing.T) {
+			o := EncodeLength(tt.input)
+			if o != tt.length {
+				t.Errorf("wrong length for %v, expected %v got %v", tt.input, tt.length, o)
+			}
+		})
+	}
+}
+
+func TestEncodeLenTotal(t *testing.T) {
+	tests := []struct {
+		input  []string
+		expect int
+	}{
+		{[]string{`""`, `"abc"`, `"aaa\"aaa"`, `"\x27"`}, 19},
+	}
+
+	for i, x := range tests {
+		tt := x
+		t.Run(fmt.Sprintf("test %v", i), func(t *testing.T) {
+			got := TotalEncodeMem(tt.input)
+			if got != tt.expect {
+				t.Errorf("wrong output, expected %v got %v", tt.expect, got)
+			}
+		})
+	}
+}

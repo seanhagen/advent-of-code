@@ -58,3 +58,22 @@ func TotalMem(in []string) int {
 
 	return s1 - s2
 }
+
+func EncodeLength(in string) int {
+	o := strconv.Quote(in)
+	return len(o)
+}
+
+func TotalEncodeMem(in []string) int {
+	s1, s2 := 0, 0
+
+	for _, v := range in {
+		l1 := len(v)
+		l2 := EncodeLength(v)
+
+		s1 += l1
+		s2 += l2
+	}
+
+	return s2 - s1
+}

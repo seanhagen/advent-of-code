@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os"
+
+	"github.com/seanhagen/advent-of-code/2015/day08"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 /*
@@ -24,6 +26,11 @@ the total encoded length (6 + 9 + 16 + 11 = 42) minus the characters in the orig
 representation (23, just like in the first part of this puzzle) is 42 - 23 = 19.  */
 
 func main() {
-	fmt.Printf("nope!\n")
-	os.Exit(1)
+	data := []string{}
+	lib.LoadAndLoop("../input.txt", func(in string) error {
+		data = append(data, in)
+		return nil
+	})
+	d := day08.TotalEncodeMem(data)
+	fmt.Printf("answer: %v\n", d)
 }
