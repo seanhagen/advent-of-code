@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// MemLength ...
 func MemLength(in string) int {
 	bits := strings.Split(in, "")
 	tmp := bits[1 : len(bits)-1]
@@ -36,7 +37,7 @@ func MemLength(in string) int {
 
 			if n == `\` || n == `"` {
 				v = n
-				idx += 1
+				idx++
 			}
 		}
 		out = append(out, v)
@@ -45,6 +46,7 @@ func MemLength(in string) int {
 	return len(out)
 }
 
+// TotalMem ...
 func TotalMem(in []string) int {
 	s1, s2 := 0, 0
 
@@ -59,11 +61,13 @@ func TotalMem(in []string) int {
 	return s1 - s2
 }
 
+// EncodeLength ...
 func EncodeLength(in string) int {
 	o := strconv.Quote(in)
 	return len(o)
 }
 
+// TotalEncodeMem ...
 func TotalEncodeMem(in []string) int {
 	s1, s2 := 0, 0
 
