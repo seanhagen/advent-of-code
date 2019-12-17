@@ -1,8 +1,12 @@
 package main
 
 import (
-  "fmt"
-  "os"
+	"fmt"
+	"os"
+
+	"github.com/seanhagen/advent-of-code/2019/day15"
+	"github.com/seanhagen/advent-of-code/2019/lib2019"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 /*
@@ -50,59 +54,59 @@ watching the status codes.
 For example, we can draw the area using D for the droid, # for walls, . for locations the droid can
 traverse, and empty space for unexplored locations.  Then, the initial state looks like this:
 
-      
-      
-   D  
-      
-      
+
+
+   D
+
+
 
 
 To make the droid go north, send it 1. If it replies with 0, you know that location is a wall and
 that the droid didn't move:
 
-      
-   #  
-   D  
-      
-      
+
+   #
+   D
+
+
 
 
 To move east, send 4; a reply of 1 means the movement was successful:
 
-      
-   #  
-   .D 
-      
-      
+
+   #
+   .D
+
+
 
 
 Then, perhaps attempts to move north (1), south (2), and east (4) are all met with replies of 0:
 
-      
-   ## 
+
+   ##
    .D#
-    # 
-      
+    #
+
 
 
 Now, you know the repair droid is in a dead end. Backtrack with 3 (which you already know will get a
 reply of 1 because you already know that location is open):
 
-      
-   ## 
+
+   ##
    D.#
-    # 
-      
+    #
+
 
 
 Then, perhaps west (3) gets a reply of 0, south (2) gets a reply of 1, south again (2) gets a reply
 of 0, and then west (3) gets a reply of 2:
 
-      
-   ## 
+
+   ##
   #..#
-  D.# 
-   #  
+  D.#
+   #
 
 
 Now, because of the reply of 2, you know you've found the oxygen system! In this example, it was
@@ -113,7 +117,25 @@ position to the location of the oxygen system?
 
 */
 
-func main(){
-  fmt.Printf("nope!\n")
-  os.Exit(1)
+func main() {
+	f := lib.LoadInput("../input.txt")
+	p, err := lib2019.ReadProgram(f)
+	if err != nil {
+		fmt.Printf("unable to read repair droid program: %v\n", err)
+		os.Exit(1)
+	}
+
+	robo, err := day15.CreateRepairDroid(p)
+	if err != nil {
+		fmt.Printf("unable to create repair droid: %v\n", err)
+		os.Exit(1)
+	}
+
+	err = robo.FindOxygenSystem()
+	if err != nil {
+		fmt.Printf("unable to find oxygen system: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("found it?\n")
 }
