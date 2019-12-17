@@ -116,8 +116,6 @@ func CreateRepairDroid(p *lib2019.Program) (*RepairDroid, error) {
 
 // Print ...
 func (r RepairDroid) Print() {
-	fmt.Printf("\nx: %v -> %v\ny: %v -> %v\n\n", r.minX, r.maxX, r.minY, r.maxY)
-
 	for j := r.maxY + 1; j >= r.minY-1; j-- {
 		for i := r.minX - 1; i <= r.maxX+1; i++ {
 			if i == 0 && j == 0 {
@@ -164,7 +162,6 @@ func (r *RepairDroid) outputFn(in int) bool {
 	switch outputToTileType[in] {
 	case tileEmpty:
 		// moved and found an empty tile
-		fmt.Printf("found empty tile while going %v\n", moveNames[r.nextDir])
 		r.move()
 		r.turn()
 
@@ -174,10 +171,8 @@ func (r *RepairDroid) outputFn(in int) bool {
 
 	case tileWall:
 		// didn't move, wall in the way
-		fmt.Printf("found wall -- ")
 		r.turn()
 	}
-	fmt.Printf("\n")
 	return true
 }
 
@@ -270,21 +265,17 @@ func (r *RepairDroid) moveBacktrack() {
 	if r.btr {
 		if !nok {
 			// haven't gone north from here yet, give it a go
-			fmt.Printf("\n btr, going north!")
 			r.nextDir = north
 			goto setdir
 		} else if nok && !wok {
-			fmt.Printf("\n btr neighbour north, going west!")
 			// north has been expored, but west hasn't, go that way
 			r.nextDir = west
 			goto setdir
 		} else if nok && wok && !sok {
-			fmt.Printf("\n btr neighbour north and west, going south!")
 			// north and west have been expored, but south hasn't
 			r.nextDir = south
 			goto setdir
 		} else if nok && sok && wok && !eok {
-			fmt.Printf("\n btr neighbour north, west, and south, going east!")
 			// last try, go east
 			r.nextDir = east
 			goto setdir
@@ -297,46 +288,31 @@ func (r *RepairDroid) moveBacktrack() {
 			}
 		}
 
-		fmt.Printf("\n btr fallback, moving %v", moveNames[nextDir])
 		r.nextDir = nextDir
 		goto setdir
-
-		// fmt.Printf("\n really stuck in dead end, now what")
-		// r.shouldExit = true
-		// return
 	}
-	fmt.Printf("need to move in backtrack mode, idx: %v\n", r.idx)
 
 	r.btr = true
 	if nok && nn.t != tileWall {
-		fmt.Printf("idx north: %v\n", nn.idx)
-		fmt.Printf("initial backtrack check, going north\n")
 		r.nextDir = north
 		goto setdir
 	}
 
 	if sok && sn.t != tileWall {
-		fmt.Printf("idx south: %v\n", sn.idx)
-		fmt.Printf("initial backtrack check, going south\n")
 		r.nextDir = south
 		goto setdir
 	}
 
 	if wok && wn.t != tileWall {
-		fmt.Printf("idx west: %v\n", wn.idx)
-		fmt.Printf("initial backtrack check, going west\n")
 		r.nextDir = west
 		goto setdir
 	}
 
 	if eok && en.t != tileWall {
-		fmt.Printf("idx east: %v\n", en.idx)
-		fmt.Printf("initial backtrack check, going east\n")
 		r.nextDir = east
 		goto setdir
 	}
 
-	fmt.Printf("should never get here!\n")
 	r.shouldExit = true
 	return
 
@@ -358,23 +334,18 @@ func (r *RepairDroid) moveNormal() {
 	var turnTo move
 
 	if !nok {
-		fmt.Printf("\n no neighbour north, going north!")
 		// haven't gone north from here yet, give it a go
 		turnTo = north
 	} else if nok && !wok {
-		fmt.Printf("\n neighbour north, going west!")
 		// north has been expored, but west hasn't, go that way
 		turnTo = west
 	} else if nok && wok && !sok {
-		fmt.Printf("\n neighbour north and west, going south!")
 		// north and west have been expored, but south hasn't
 		turnTo = south
 	} else if nok && sok && wok && !eok {
-		fmt.Printf("\n neighbour north, west, and south, going east!")
 		// last try, go east
 		turnTo = east
 	} else {
-		fmt.Printf("\n stuck in dead end, now what")
 		r.backtrackMode = true
 		return
 	}
@@ -383,15 +354,10 @@ func (r *RepairDroid) moveNormal() {
 	dirs := moveDir[turnTo]
 	r.xdir = dirs[0]
 	r.ydir = dirs[1]
-
-	// r.shouldExit = true
-
 }
 
 // foundOxygen ...
 func (r *RepairDroid) foundOxygen() {
-	fmt.Printf("FOUND OXYGEN SYSTEM\n")
-	r.shouldExit = true
 }
 
 // FindOxygenSystem ...
