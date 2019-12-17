@@ -85,6 +85,9 @@ type RepairDroid struct {
 	minY int
 	maxY int
 
+	oxyX int
+	oxyY int
+
 	nextDir move
 	idx     int
 
@@ -168,6 +171,8 @@ func (r *RepairDroid) outputFn(in int) bool {
 	case tileOxy:
 		// moved and found oxygen system
 		r.foundOxygen()
+		r.move()
+		r.turn()
 
 	case tileWall:
 		// didn't move, wall in the way
@@ -230,6 +235,11 @@ func (r *RepairDroid) move() {
 	}
 	if ny < r.minY {
 		r.minY = ny
+	}
+
+	if r.xpos == 0 && r.ypos == 0 {
+		fmt.Printf("back at start!\n")
+		r.shouldExit = true
 	}
 }
 
@@ -317,7 +327,12 @@ func (r *RepairDroid) moveBacktrack() {
 	return
 
 setdir:
-	dirs := moveDir[r.nextDir]
+	dirs, ok := moveDir[r.nextDir]
+	if !ok {
+		dirs = moveDir[south]
+		r.nextDir = south
+	}
+
 	r.xdir = dirs[0]
 	r.ydir = dirs[1]
 
@@ -358,6 +373,8 @@ func (r *RepairDroid) moveNormal() {
 
 // foundOxygen ...
 func (r *RepairDroid) foundOxygen() {
+	r.oxyX = r.xpos
+	r.oxyY = r.ypos
 }
 
 // FindOxygenSystem ...
