@@ -62,6 +62,12 @@ var opIncr = map[int]int{
 	OpHalt: 1,
 }
 
+// InputFn is a function that outputs an integer to be consumed as input by the program
+type InputFn func() int
+
+// OutputFn is a function that recieves the output of the program, and returns true if the program should halt
+type OutputFn func(int) bool
+
 // Program is an intcode program
 type Program struct {
 	code     string
@@ -76,6 +82,12 @@ type Program struct {
 
 	pauseOnOutput bool
 	halted        bool
+
+	hasInputFn bool
+	inFn       InputFn
+
+	hasOutputFn bool
+	outFn       OutputFn
 }
 
 // FromString reads a program code from the string input
@@ -101,6 +113,18 @@ func ReadProgram(f *os.File) (*Program, error) {
 		return nil, err
 	}
 	return FromString(string(d))
+}
+
+// SetInputFunc ...
+func (p *Program) SetInputFunc(fn InputFn) {
+	p.hasInputFn = true
+	p.inFn = fn
+}
+
+// SetOutputFn ...
+func (p *Program) SetOutputFn(fn OutputFn) {
+	p.hasOutputFn = true
+	p.outFn = fn
 }
 
 // Unhalt ...
@@ -297,13 +321,17 @@ func (p *Program) Run() error {
 			p.data[z] = x * y
 
 		case OpSav:
-			// fmt.Printf("trying to read from %v, inputs: %#v\n", p.inPtr, p.inputs)
-			if len(p.inputs)-1 < p.inPtr {
-				// fmt.Printf("not enough input, returning for now\n")
-				goto done
+			var in int
+			if p.hasInputFn {
+				in = p.inFn()
+			} else {
+				// fmt.Printf("trying to read from %v, inputs: %#v\n", p.inPtr, p.inputs)
+				if len(p.inputs)-1 < p.inPtr {
+					// fmt.Printf("not enough input, returning for now\n")
+					goto done
+				}
+				in = p.inputs[p.inPtr]
 			}
-
-			in := p.inputs[p.inPtr]
 
 			var a int
 			switch pC {
@@ -324,16 +352,32 @@ func (p *Program) Run() error {
 			case "0":
 				a := p.data[pos+1]
 				// fmt.Printf(" -- %v to be stored in output", a)
-				p.outputs = append(p.outputs, p.data[a])
+				if p.hasOutputFn {
+					p.pauseOnOutput = p.outFn(p.data[a])
+				} else {
+					p.outputs = append(p.outputs, p.data[a])
+				}
+
 			case "1":
 				// fmt.Printf(" -- %v to be stored in output", p.data[pos+1])
-				p.outputs = append(p.outputs, p.data[pos+1])
+				if p.hasOutputFn {
+					p.pauseOnOutput = p.outFn(p.data[pos+1])
+				} else {
+					p.outputs = append(p.outputs, p.data[pos+1])
+				}
+
 			case "2":
 				a := p.data[pos+1]
 				p.checkMemory(pos, a, pC)
+
 				// fmt.Printf(" -- %v to be stored in output", p.data[p.relBase+a])
-				p.outputs = append(p.outputs, p.data[p.relBase+a])
+				if p.hasOutputFn {
+					p.pauseOnOutput = p.outFn(p.data[p.relBase+a])
+				} else {
+					p.outputs = append(p.outputs, p.data[p.relBase+a])
+				}
 			}
+
 			if p.pauseOnOutput {
 				pos += incr
 				p.position = pos
