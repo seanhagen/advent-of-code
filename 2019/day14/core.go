@@ -1,59 +1,21 @@
 package day14
 
 import (
-	"fmt"
+	"math"
 	"strconv"
 	"strings"
-
-	"github.com/davecgh/go-spew/spew"
 )
+
+const oneTril int64 = 1000000000000
 
 type reaction struct {
 	name string
 
-	out     int
-	inputs  map[string]int
-	outputs map[string]int
+	req     int64
+	perProd int64
 
-	required int
-}
-
-func newReaction(in string) (*reaction, error) {
-	parts := strings.Split(in, " => ")
-
-	input := strings.TrimSpace(parts[0])
-	out := strings.TrimSpace(parts[1])
-
-	parts = strings.Split(out, " ")
-	name := parts[1]
-	c, err := strconv.Atoi(parts[0])
-	if err != nil {
-		return nil, err
-	}
-
-	req := 0
-	if name == "FUEL" {
-		req = 1
-	}
-
-	r := reaction{
-		name:     name,
-		out:      c,
-		inputs:   map[string]int{},
-		outputs:  map[string]int{},
-		required: req,
-	}
-
-	parts = strings.Split(input, ",")
-	for _, v := range parts {
-		tmp := strings.Split(strings.TrimSpace(v), " ")
-		c, err = strconv.Atoi(tmp[0])
-		if err != nil {
-			return nil, err
-		}
-		r.inputs[tmp[1]] = c
-	}
-	return &r, nil
+	inputs  map[string]int64
+	outputs map[string]int64
 }
 
 // Nanofactory ...
@@ -62,86 +24,172 @@ type Nanofactory struct {
 }
 
 // CreateNanofactory ...
-func CreateNanofactory() *Nanofactory {
-	return &Nanofactory{outputs: map[string]*reaction{}}
+func CreateNanofactory(input []string) (*Nanofactory, error) {
+	nf := &Nanofactory{outputs: map[string]*reaction{}}
+	for _, v := range input {
+		err := nf.addReaction(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	nf.outputs["FUEL"].req = 1
+	nf.outputs["ORE"].perProd = 1
+
+	return nf, nil
 }
 
-// AddReaction ...
-func (n *Nanofactory) AddReaction(in string) error {
-	r, err := newReaction(in)
-	if err != nil {
-		return err
-	}
-	n.outputs[r.name] = r
+// addReaction ...
+func (n *Nanofactory) addReaction(in string) error {
+	bits := strings.Split(in, " => ")
+	outBits := strings.Split(bits[1], " ")
 
+	outName := outBits[1]
+	o, ok := n.outputs[outName]
+	if !ok {
+		on, err := strconv.ParseInt(outBits[0], 10, 64)
+		if err != nil {
+			return err
+		}
+
+		o = &reaction{
+			name:    outName,
+			perProd: on,
+			inputs:  map[string]int64{},
+			outputs: map[string]int64{},
+		}
+	} else {
+		on, err := strconv.ParseInt(outBits[0], 10, 64)
+		if err != nil {
+			return err
+		}
+
+		o.perProd = on
+	}
+
+	inputs := strings.Split(bits[0], ", ")
+
+	for _, v := range inputs {
+		r := strings.Split(v, " ")
+		c, err := strconv.ParseInt(r[0], 10, 64)
+		if err != nil {
+			return err
+		}
+
+		in := r[1]
+		inp, ok := n.outputs[in]
+		if !ok {
+			inp = &reaction{name: in, perProd: 0, req: 0, inputs: map[string]int64{}, outputs: map[string]int64{}}
+		}
+
+		o.inputs[in] = c
+		inp.outputs[o.name] = c
+		n.outputs[in] = inp
+	}
+
+	n.outputs[o.name] = o
 	return nil
 }
 
 // CalcOreReq ...
-func (n Nanofactory) CalcOreReq() int {
-	reqs := map[string]int{}
+func (n Nanofactory) CalcOreReq() int64 {
+	return calcOre(n.outputs)
+}
 
-	oreOuts := map[int]map[string]int{}
+func calcOre(graph map[string]*reaction) int64 {
+	if _, ok := graph["ORE"]; !ok {
+		return 0
+	}
 
-	onlyOreIn := map[string]bool{}
+	list := revTopSort(graph, "ORE")
 
-	for _, r := range n.outputs {
-		if v, ok := r.inputs["ORE"]; ok && len(r.inputs) == 1 {
-			o, ok := oreOuts[v]
-			if !ok {
-				o = map[string]int{}
-			}
-			onlyOreIn[r.name] = true
-
-			o[r.name] = r.num
-			oreOuts[v] = o
-		}
-
-		if _, ok := r.inputs["ORE"]; !ok {
-			for k, v := range r.inputs {
-				reqs[k] += v
-			}
+	for _, na := range list {
+		v := graph[na]
+		c := float64(v.req) / float64(v.perProd)
+		ri := int64(math.Max(1.0, math.Ceil(c)))
+		for name, cost := range v.inputs {
+			graph[name].req += ri * cost
 		}
 	}
 
-	spew.Dump(reqs, oreOuts, onlyOreIn)
+	return graph["ORE"].req
 
-	fmt.Printf("ore outs: \n%v\n\nreqs:\n%v\n\n", spew.Sdump(oreOuts), spew.Sdump(reqs))
+}
 
-	ore := 0
-	ores := map[string]int{}
+func revTopSort(graph map[string]*reaction, s string) []string {
+	ord := []string{}
+	visited := map[string]bool{}
 
-	// for k := range onlyOreIn {
-	// 	v := reqs[k]
-	// 	fmt.Printf("need %v %v\n", v, k)
-
-	// 	r := n.outputs[k]
-	// 	fmt.Printf("thing: %#v\n", r)
-
-	// 	os.Exit(1)
-	// }
-
-	for or, r := range oreOuts {
-		fmt.Printf("%v ore gives: %#v\n", or, r)
-		tmp := 0
-		for k, v := range r {
-			required := reqs[k]
-
-			// fmt.Printf("have %v ore, need %v, tmp: %v, v: %v\n", ore, required, tmp, v)
-			for {
-				tmp += v
-				if tmp >= required {
-					ores[k] = tmp
-					break
-				}
-			}
+	var fn func(v *reaction, name string)
+	fn = func(v *reaction, name string) {
+		if len(v.outputs) == 0 {
+			ord = append(ord, v.name)
+			return
 		}
 
-		ore += tmp
+		for ne := range v.outputs {
+			if _, ok := visited[ne]; ok {
+				continue
+			}
+			visited[ne] = true
+			fn(graph[ne], ne)
+		}
+		ord = append(ord, name)
+	}
+	fn(graph[s], s)
+	return ord
+}
+
+// copy ...
+func (n Nanofactory) copy() map[string]*reaction {
+	out := map[string]*reaction{}
+
+	for k, v := range n.outputs {
+		inputs := map[string]int64{}
+		outputs := map[string]int64{}
+
+		for kk, vv := range v.inputs {
+			inputs[kk] = vv
+		}
+
+		for kk, vv := range v.outputs {
+			outputs[kk] = vv
+		}
+
+		out[k] = &reaction{
+			name:    v.name,
+			req:     v.req,
+			perProd: v.perProd,
+			inputs:  inputs,
+			outputs: outputs,
+		}
 	}
 
-	fmt.Printf("\nore now: %v\n", ore)
-	spew.Dump(ores)
+	return out
+}
 
-	return ore
+// CalcTrillionOre ...
+func (n Nanofactory) CalcTrillionOre() int64 {
+	var best int64
+	var oreLim = oneTril
+	var right = oneTril
+	var left int64 = 1
+
+	for left <= right {
+		graph := n.copy()
+		mid := (left + right) / 2
+		graph["FUEL"].req = mid
+		reqOre := calcOre(graph)
+
+		if reqOre < oreLim {
+			best = int64(math.Max(float64(best), float64(mid)))
+			left = mid + 1
+		} else if reqOre > oneTril {
+			right = mid - 1
+		} else {
+			return mid
+		}
+	}
+
+	return best
 }

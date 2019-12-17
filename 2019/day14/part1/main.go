@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/seanhagen/advent-of-code/2019/day14"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 /*
@@ -126,6 +129,18 @@ produce exactly 1 FUEL?
 */
 
 func main() {
-	fmt.Printf("nope!\n")
-	os.Exit(1)
+	data := []string{}
+	lib.LoadAndLoop("../input.txt", func(in string) error {
+		data = append(data, in)
+		return nil
+	})
+
+	nf, err := day14.CreateNanofactory(data)
+	if err != nil {
+		fmt.Printf("unable to create nanofactory: %v\n", err)
+		os.Exit(1)
+	}
+	o := nf.CalcOreReq()
+
+	fmt.Printf("answer: %v\n", o)
 }
