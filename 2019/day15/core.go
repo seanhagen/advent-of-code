@@ -428,107 +428,28 @@ func (r RepairDroid) FillOxygen() (int, error) {
 
 		for _, t := range next {
 			fmt.Printf("checking neighbours of %v,%v\n", t.x, t.y)
+
+			if t.t != tileOxy {
+				t.t = tileHasOxy
+			}
+
 			seen = append(seen, t)
 
 			for dir, nt := range t.neighbours {
-				fmt.Printf("%v neighbour tile at %v,%v (%v) -- ", moveNames[dir], nt.x, nt.y, nt.t)
-				if nt.t == tileWall {
-					fmt.Printf("is wall, skipping tile\n")
-					continue
+				fmt.Printf("checking %v neighbour of (%v,%v) -> %v,%v -- t: %v, idx: %v\n", moveNames[dir], t.x, t.y, nt.x, nt.y, nt.t, nt.idx)
+
+				if !seenTile(nt, seen) && nt.t != tileWall {
+					nn = append(nn, nt)
 				}
-				fmt.Printf("not wall!\n")
-
-				if seenTile(nt, seen) {
-					fmt.Printf("\thave seen this tile already, skipping tile!\n")
-					continue
-				}
-				fmt.Printf("\thave not seen tile, getting neighbours\n")
-
-				nt.t = tileHasOxy
-
-				n, nok := nt.neighbours[north]
-				if nok && !seenTile(n, seen) && n.t != tileWall {
-					fmt.Printf("\thaven't seen north neighbour\n")
-					nn = append(nn, n)
-				} else {
-					if !nok {
-						fmt.Printf("\tno north neighbour\n")
-					} else {
-						if seenTile(n, seen) {
-							fmt.Printf("\tnorth tile already seen\n")
-						} else {
-							if n.t == tileWall {
-								fmt.Printf("\tnorth tile is wall\n")
-							} else {
-								fmt.Printf("\tdunno\n")
-							}
-						}
-					}
-				}
-
-				s, sok := nt.neighbours[south]
-				if sok && !seenTile(s, seen) && s.t != tileWall {
-					fmt.Printf("\thaven't seen south neighbour\n")
-					nn = append(nn, s)
-				} else {
-					if !sok {
-						fmt.Printf("\tno south neighbour\n")
-					} else {
-						if seenTile(s, seen) {
-							fmt.Printf("\tsouth tile already seen\n")
-						} else {
-							if s.t == tileWall {
-								fmt.Printf("\tsouth tile is wall\n")
-							} else {
-								fmt.Printf("\tdunno\n")
-							}
-						}
-					}
-				}
-
-				e, eok := nt.neighbours[east]
-				if eok && !seenTile(e, seen) && e.t != tileWall {
-					fmt.Printf("\thaven't seen east neighbour\n")
-					nn = append(nn, e)
-
-				} else {
-					if !eok {
-						fmt.Printf("\tno east neighbour\n")
-					} else {
-						if seenTile(e, seen) {
-							fmt.Printf("\teast tile already seen\n")
-						} else {
-							if e.t == tileWall {
-								fmt.Printf("\teast tile is wall\n")
-							} else {
-								fmt.Printf("\tdunno\n")
-							}
-						}
-					}
-				}
-
-				w, wok := nt.neighbours[west]
-				if wok && !seenTile(w, seen) && w.t != tileWall {
-					fmt.Printf("\thaven't seen west neighbour\n")
-					nn = append(nn, w)
-				} else {
-					if !wok {
-						fmt.Printf("\tno west neighbour\n")
-					} else {
-						if seenTile(w, seen) {
-							fmt.Printf("\twest tile already seen\n")
-						} else {
-							if w.t == tileWall {
-								fmt.Printf("\twest tile is wall\n")
-							} else {
-								fmt.Printf("\tdunno\n")
-							}
-						}
-					}
-				}
-
 			}
+
 		}
+
+		fmt.Printf("\nup next: \n")
+		printTileSlice(nn)
+
+		fmt.Printf("\n\nseen: \n")
+		printTileSlice(seen)
 
 		next = nn
 		if len(next) == 0 {
@@ -536,21 +457,15 @@ func (r RepairDroid) FillOxygen() (int, error) {
 		}
 		steps++
 
-		fmt.Printf("\nup next: \n")
-		printTileSlice(next)
-
-		fmt.Printf("\n\nseen: \n")
-		printTileSlice(seen)
-
-		if steps == 2 {
-			break
-		}
+		// if steps == 100 {
+		// 	break
+		// }
 
 		fmt.Printf("\n------------\n\n")
 	}
 
-	// r.Print()
-	return steps, fmt.Errorf("not yet")
+	r.Print()
+	return steps, nil
 }
 
 // PathOxygen ...
