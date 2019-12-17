@@ -17,9 +17,11 @@ const (
 type tileType string
 
 const (
-	tileEmpty tileType = "."
-	tileWall  tileType = "#"
-	tileOxy   tileType = "o"
+	tileEmpty  tileType = "."
+	tileWall   tileType = "#"
+	tileOxy    tileType = "o"
+	tilePath   tileType = "p"
+	tileHasOxy tileType = "O"
 )
 
 var outputToTileType = map[int]tileType{
@@ -76,6 +78,8 @@ type RepairDroid struct {
 	//         y       x   seen
 	tiles map[int]map[int]*tile
 
+	allTiles []*tile
+
 	xpos int
 	ypos int
 	xdir int
@@ -125,6 +129,10 @@ func (r RepairDroid) Print() {
 				fmt.Printf("s")
 			} else if i == r.xpos && j == r.ypos {
 				fmt.Printf("d")
+				// } else if i == 0 && j == -16 {
+				// 	fmt.Printf("X")
+				// } else if i == -8 && j == -18 {
+				// 	fmt.Printf("Y")
 			} else {
 				t, ok := r.tiles[j][i]
 				if !ok {
@@ -170,9 +178,9 @@ func (r *RepairDroid) outputFn(in int) bool {
 
 	case tileOxy:
 		// moved and found oxygen system
-		r.foundOxygen()
 		r.move()
 		r.turn()
+		r.foundOxygen()
 
 	case tileWall:
 		// didn't move, wall in the way
@@ -183,7 +191,6 @@ func (r *RepairDroid) outputFn(in int) bool {
 
 // addNewTile ...
 func (r *RepairDroid) addNewTile(nt tileType) {
-
 	current := r.tiles[r.ypos][r.xpos]
 	nx := r.xpos + r.xdir
 	ny := r.ypos + r.ydir
@@ -210,6 +217,9 @@ func (r *RepairDroid) addNewTile(nt tileType) {
 		r.idx++
 		r.btr = false
 		r.backtrackMode = false
+		if nt == tileEmpty {
+			r.allTiles = append(r.allTiles, t)
+		}
 	}
 	current.neighbours[r.nextDir] = t
 }
@@ -399,4 +409,225 @@ func (r *RepairDroid) FindOxygenSystem() error {
 	r.Print()
 
 	return nil
+}
+
+// FillOxygen ...
+func (r RepairDroid) FillOxygen() (int, error) {
+	steps := 0
+
+	lx := r.oxyX
+	ly := r.oxyY
+
+	ct := r.tiles[ly][lx]
+
+	seen := []*tile{}
+	next := []*tile{ct}
+
+	for {
+		nn := []*tile{}
+
+		for _, t := range next {
+			fmt.Printf("checking neighbours of %v,%v\n", t.x, t.y)
+			seen = append(seen, t)
+
+			for dir, nt := range t.neighbours {
+				fmt.Printf("%v neighbour tile at %v,%v (%v) -- ", moveNames[dir], nt.x, nt.y, nt.t)
+				if nt.t == tileWall {
+					fmt.Printf("is wall, skipping tile\n")
+					continue
+				}
+				fmt.Printf("not wall!\n")
+
+				if seenTile(nt, seen) {
+					fmt.Printf("\thave seen this tile already, skipping tile!\n")
+					continue
+				}
+				fmt.Printf("\thave not seen tile, getting neighbours\n")
+
+				nt.t = tileHasOxy
+
+				n, nok := nt.neighbours[north]
+				if nok && !seenTile(n, seen) && n.t != tileWall {
+					fmt.Printf("\thaven't seen north neighbour\n")
+					nn = append(nn, n)
+				} else {
+					if !nok {
+						fmt.Printf("\tno north neighbour\n")
+					} else {
+						if seenTile(n, seen) {
+							fmt.Printf("\tnorth tile already seen\n")
+						} else {
+							if n.t == tileWall {
+								fmt.Printf("\tnorth tile is wall\n")
+							} else {
+								fmt.Printf("\tdunno\n")
+							}
+						}
+					}
+				}
+
+				s, sok := nt.neighbours[south]
+				if sok && !seenTile(s, seen) && s.t != tileWall {
+					fmt.Printf("\thaven't seen south neighbour\n")
+					nn = append(nn, s)
+				} else {
+					if !sok {
+						fmt.Printf("\tno south neighbour\n")
+					} else {
+						if seenTile(s, seen) {
+							fmt.Printf("\tsouth tile already seen\n")
+						} else {
+							if s.t == tileWall {
+								fmt.Printf("\tsouth tile is wall\n")
+							} else {
+								fmt.Printf("\tdunno\n")
+							}
+						}
+					}
+				}
+
+				e, eok := nt.neighbours[east]
+				if eok && !seenTile(e, seen) && e.t != tileWall {
+					fmt.Printf("\thaven't seen east neighbour\n")
+					nn = append(nn, e)
+
+				} else {
+					if !eok {
+						fmt.Printf("\tno east neighbour\n")
+					} else {
+						if seenTile(e, seen) {
+							fmt.Printf("\teast tile already seen\n")
+						} else {
+							if e.t == tileWall {
+								fmt.Printf("\teast tile is wall\n")
+							} else {
+								fmt.Printf("\tdunno\n")
+							}
+						}
+					}
+				}
+
+				w, wok := nt.neighbours[west]
+				if wok && !seenTile(w, seen) && w.t != tileWall {
+					fmt.Printf("\thaven't seen west neighbour\n")
+					nn = append(nn, w)
+				} else {
+					if !wok {
+						fmt.Printf("\tno west neighbour\n")
+					} else {
+						if seenTile(w, seen) {
+							fmt.Printf("\twest tile already seen\n")
+						} else {
+							if w.t == tileWall {
+								fmt.Printf("\twest tile is wall\n")
+							} else {
+								fmt.Printf("\tdunno\n")
+							}
+						}
+					}
+				}
+
+			}
+		}
+
+		next = nn
+		if len(next) == 0 {
+			break
+		}
+		steps++
+
+		fmt.Printf("\nup next: \n")
+		printTileSlice(next)
+
+		fmt.Printf("\n\nseen: \n")
+		printTileSlice(seen)
+
+		if steps == 2 {
+			break
+		}
+
+		fmt.Printf("\n------------\n\n")
+	}
+
+	// r.Print()
+	return steps, fmt.Errorf("not yet")
+}
+
+// PathOxygen ...
+func (r RepairDroid) PathOxygen() (int, error) {
+	steps := 0
+
+	lx := r.oxyX
+	ly := r.oxyY
+	// lx := -8 // checking first intersection
+	// ly := -18
+
+	ct := r.tiles[ly][lx]
+
+	// var lt *tile
+	// lt = r.tiles[-17][0]
+
+	for {
+		var next *tile
+		n, nok := ct.neighbours[north]
+		if nok {
+			if n.idx <= ct.idx && n.t != tileWall {
+				// lt = ct
+				next = n
+			}
+		}
+
+		s, sok := ct.neighbours[south]
+		if sok {
+			if s.idx <= ct.idx && s.t != tileWall {
+				// lt = ct
+				next = s
+			}
+		}
+
+		e, eok := ct.neighbours[east]
+		if eok {
+			if e.idx <= ct.idx && e.t != tileWall {
+				// lt = ct
+				next = e
+			}
+		}
+
+		w, wok := ct.neighbours[west]
+		if wok {
+			if w.idx <= ct.idx && w.t != tileWall {
+				// lt = ct
+				next = w
+			}
+		}
+
+		if ct.t != tileOxy {
+			ct.t = tilePath
+			r.tiles[ct.y][ct.x] = ct
+		}
+
+		ct = next
+		steps++
+		if ct.x == 0 && ct.y == 0 {
+			break
+		}
+	}
+	return steps, nil
+}
+
+// seenTile ...
+func seenTile(t *tile, tiles []*tile) bool {
+	for _, v := range tiles {
+		if v.x == t.x && v.y == t.y {
+			return true
+		}
+	}
+
+	return false
+}
+
+func printTileSlice(tiles []*tile) {
+	for _, v := range tiles {
+		fmt.Printf("tile: %v,%v, t: %v, idx: %v\n", v.x, v.y, v.t, v.idx)
+	}
 }

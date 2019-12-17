@@ -137,5 +137,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("found it?\n")
+	steps, err := robo.PathOxygen()
+	if err != nil {
+		fmt.Printf("unable to path from start to oxygen: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("steps: %v\n", steps)
 }
