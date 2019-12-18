@@ -2,6 +2,36 @@ package facing
 
 import "fmt"
 
+// NearMover ...
+func (m Mover) NearMover(i int) map[Direction]interface{} {
+	out := map[Direction]interface{}{}
+	if i < 0 || i >= len(m.mvrs) {
+		return out
+	}
+
+	mvr := m.mvrs[i]
+	cx, cy := mvr.x, mvr.y
+
+	for dir, vec := range Vectors {
+		// fmt.Printf("dir: %v -> %#v\n", dir, vec)
+		tx, ty := cx+vec[0], cy+vec[1]
+		rw, ok := m.things[tx]
+		if ok {
+			if t, ok := rw[ty]; ok {
+				out[dir] = t
+				// fmt.Printf("\tthing at %v,%v: %v\n", tx, ty, t)
+			}
+		}
+	}
+
+	return out
+}
+
+// NearCurrent ...
+func (m Mover) NearCurrent() map[Direction]interface{} {
+	return m.NearMover(m.curMvr)
+}
+
 // GetAt will return the thing stored at X,Y. It will create a new thing
 // by calling the configured NewObj function if nothing exists at that spot.
 func (m Mover) GetAt(x, y int) interface{} {
@@ -20,7 +50,8 @@ func (m Mover) GetAt(x, y int) interface{} {
 
 // GetCurrent ...
 func (m Mover) GetCurrent() interface{} {
-	return m.GetAt(m.lastX, m.lastY)
+	mvr := m.cur()
+	return m.GetAt(mvr.x, mvr.y)
 }
 
 // SetAt sets the thing at x,y to n. Returns an error if the type of n
@@ -29,12 +60,10 @@ func (m *Mover) SetAt(x, y int, n interface{}) error {
 	if !typeEqual(m.inType, n) {
 		return fmt.Errorf("value %#v type %T isn't same type as %T", n, n, m.inType)
 	}
-
 	row, ok := m.things[x]
 	if !ok {
 		row = map[int]interface{}{}
 	}
-
 	row[y] = n
 	m.things[x] = row
 	return nil

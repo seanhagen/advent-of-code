@@ -63,7 +63,7 @@ var opIncr = map[int]int{
 }
 
 // InputFn is a function that outputs an integer to be consumed as input by the program
-type InputFn func() int
+type InputFn func() (int, bool)
 
 // OutputFn is a function that recieves the output of the program, and returns true if the program should halt
 type OutputFn func(int) bool
@@ -322,8 +322,9 @@ func (p *Program) Run() error {
 
 		case OpSav:
 			var in int
+			var pause bool
 			if p.hasInputFn {
-				in = p.inFn()
+				in, pause = p.inFn()
 			} else {
 				// fmt.Printf("trying to read from %v, inputs: %#v\n", p.inPtr, p.inputs)
 				if len(p.inputs)-1 < p.inPtr {
@@ -331,6 +332,7 @@ func (p *Program) Run() error {
 					goto done
 				}
 				in = p.inputs[p.inPtr]
+				p.inPtr++
 			}
 
 			var a int
@@ -345,7 +347,11 @@ func (p *Program) Run() error {
 			p.checkMemory(pos, a, pC)
 			p.data[a] = in
 			// fmt.Printf(" -- data at %v => %v", a, p.data[a])
-			p.inPtr++
+			if pause {
+				pos += incr
+				p.position = pos
+				goto done
+			}
 
 		case OpOut:
 			switch pC {

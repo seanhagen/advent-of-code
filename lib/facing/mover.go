@@ -123,8 +123,16 @@ func (m *Mover) Iterate(fn func(int, int, interface{})) {
 	}
 }
 
+// PrintMover ...
+type PrintMover func(interface{}, int)
+
 // Print ...
-func (m Mover) Print(fn func(interface{})) {
+func (m Mover) Print(fn PrintMover) {
+	fmt.Printf("num movers: %v\n", m.numMvrs)
+	for i, m := range m.mvrs {
+		fmt.Printf("mover %v at %v,%v\n", i, m.x, m.y)
+	}
+
 	xkeys := []int{}
 	ykeys := []int{}
 	for i, row := range m.things {
@@ -143,12 +151,20 @@ func (m Mover) Print(fn func(interface{})) {
 	minY := ykeys[0] - 1
 	maxY := ykeys[len(ykeys)-1] + 1
 
-	// spew.Dump(minX, maxX, minY, maxY)
+	fmt.Printf("y: %v -> %v\nx: %v -> %v\n", minY, maxY, minX, maxX)
 
-	for j := maxY; j >= minY; j-- {
+	for j := minY; j <= maxY; j++ {
 		for i := minX; i <= maxX; i++ {
 			t := m.GetAt(i, j)
-			fn(t)
+			isMover := -1
+
+			for idx, mv := range m.mvrs {
+				if i == mv.x && j == mv.y {
+					isMover = idx
+				}
+			}
+
+			fn(t, isMover)
 		}
 		fmt.Printf("  \n")
 	}

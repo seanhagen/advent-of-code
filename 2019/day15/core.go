@@ -129,10 +129,6 @@ func (r RepairDroid) Print() {
 				fmt.Printf("s")
 			} else if i == r.xpos && j == r.ypos {
 				fmt.Printf("d")
-				// } else if i == 0 && j == -16 {
-				// 	fmt.Printf("X")
-				// } else if i == -8 && j == -18 {
-				// 	fmt.Printf("Y")
 			} else {
 				t, ok := r.tiles[j][i]
 				if !ok {
@@ -140,9 +136,7 @@ func (r RepairDroid) Print() {
 				} else {
 					fmt.Printf("%v", t.t)
 				}
-
 			}
-
 		}
 		fmt.Printf("\n")
 	}

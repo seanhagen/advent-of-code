@@ -1,8 +1,11 @@
 package main
 
 import (
-  "fmt"
-  "os"
+	"fmt"
+	"os"
+
+	"github.com/seanhagen/advent-of-code/2019/lib2019"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 /*
@@ -22,7 +25,7 @@ An Intcode program, the Aft Scaffolding Control and Information Interface (ASCII
 input), provides access to the cameras and the vacuum robot.  Currently, because the vacuum robot is
 asleep, you can only access the cameras.
 
-Running the ASCII program on your Intcode computer will provide the current view of the scaffolds. 
+Running the ASCII program on your Intcode computer will provide the current view of the scaffolds.
 This is output, purely coincidentally, as ASCII code: 35 means #, 46 means ., 10 starts a new line
 of output below the current one, and so on. (Within a line, characters are drawn left-to-right.)
 
@@ -78,7 +81,123 @@ Run your ASCII program. What is the sum of the alignment parameters for the scaf
 
 */
 
-func main(){
-  fmt.Printf("nope!\n")
-  os.Exit(1)
+func main() {
+	f := lib.LoadInput("../input.txt")
+	p, err := lib2019.ReadProgram(f)
+	if err != nil {
+		fmt.Printf("unable to create program: %v\n", err)
+		os.Exit(1)
+	}
+
+	data := [][]string{}
+	tmp := []string{}
+
+	p.SetOutputFn(func(i int) bool {
+		v := fmt.Sprintf("%v", string(i))
+		if v == "\n" {
+			data = append(data, tmp)
+			tmp = []string{}
+			return false
+		}
+		tmp = append(tmp, v)
+		return false
+	})
+
+	err = p.Run()
+
+	data = data[:len(data)-1]
+	locs := map[int]map[int]bool{}
+
+	checks := []string{"#", "^", "v", "<", ">"}
+	fn := func(i string) bool {
+		for _, v := range checks {
+			if v == i {
+				return true
+			}
+		}
+		return false
+	}
+
+	endpoints := map[int]map[int]bool{}
+
+	for j, row := range data {
+		for i, d := range row {
+			if d == "." {
+				fmt.Printf(".")
+				continue
+			}
+
+			count := 0
+
+			// can check north if j > 0
+			if j > 0 {
+				n := data[j-1][i]
+				if fn(n) {
+					count++
+				}
+			}
+
+			// can check south if j < len(data)-1
+			if j < len(data)-1 {
+				s := data[j+1][i]
+				if fn(s) {
+					count++
+				}
+			}
+
+			// can check east if i < len(row) -1
+			if i < len(row)-1 {
+				e := data[j][i+1]
+				if fn(e) {
+					count++
+				}
+			}
+
+			// can check west if i > 0
+			if i > 0 {
+				w := data[j][i-1]
+				if fn(w) {
+					count++
+				}
+			}
+
+			// count > 2, then an intersection
+			if count > 2 {
+				x, ok := locs[j]
+				if !ok {
+					x = map[int]bool{}
+				}
+				x[i] = true
+				locs[j] = x
+			}
+
+			// count == 1 is an endpoint ( start or end )
+			if count == 1 {
+				tmp, ok := endpoints[j]
+				if !ok {
+					tmp = map[int]bool{}
+				}
+				tmp[i] = true
+				endpoints[j] = tmp
+			}
+
+			fmt.Printf("%v", count)
+		}
+		fmt.Printf("\n")
+	}
+
+	for y, t := range endpoints {
+		for x := range t {
+			fmt.Printf("endpoint at %v, %v\n", x, y)
+		}
+	}
+
+	sum := 0
+	for y, v := range locs {
+		for x := range v {
+			sum += x * y
+		}
+	}
+
+	fmt.Printf("answer: %v\n", sum)
 }
