@@ -1,8 +1,11 @@
 package main
 
 import (
-  "fmt"
-  "os"
+	"fmt"
+	"os"
+
+	"github.com/seanhagen/advent-of-code/2019/day16"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 /*
@@ -102,7 +105,15 @@ After 100 phases of FFT, what are the first eight digits in the final output lis
 
 */
 
-func main(){
-  fmt.Printf("nope!\n")
-  os.Exit(1)
+func main() {
+	err := lib.ProcessLine("../input.txt", func(in string) error {
+		out := day16.FirstEight(in, 100)
+		fmt.Printf("first eight: %v\n", out)
+		return nil
+	})
+	if err != nil {
+		fmt.Printf("unable to process input: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("\ndone!\n\n")
 }

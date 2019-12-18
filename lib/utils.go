@@ -84,3 +84,14 @@ func ReadLine(file *os.File) ([]byte, error) {
 	_, err = r.Read(out)
 	return out, err
 }
+
+// ProcessLine ...
+func ProcessLine(name string, fn func(string) error) error {
+	f := LoadInput(name)
+	bits, err := ReadLine(f)
+	if err != nil {
+		return err
+	}
+
+	return fn(string(bits))
+}
