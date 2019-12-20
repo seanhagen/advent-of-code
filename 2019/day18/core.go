@@ -1,402 +1,164 @@
 package day18
 
+/*
+@ -> a -> b -> c -> e -> d -> f
+                 -> d -> e -> f
+
+*/
+
 import (
 	"fmt"
+	"math/rand"
+	"sort"
 	"strings"
 )
 
-type coord [2]int
+// SolveP1 ...
+func (m Map) SolveP1() int {
+	gr := m.getCopy()
 
-// hashKey ...
-func (c coord) hashKey() string {
-	return fmt.Sprintf("coord{%v,%v}", c[0], c[1])
-}
-
-// eq ...
-func (c coord) eq(x, y int) bool {
-	return c[0] == x && c[1] == y
-}
-
-// x ...
-func (c coord) x() int {
-	return c[0]
-}
-
-// y ...
-func (c coord) y() int {
-	return c[1]
-}
-
-type edge struct {
-	a *tile
-	b *tile
-}
-
-// hashKey ...
-func (e edge) hashKey() string {
-	if e.a == nil && e.b == nil {
-		return fmt.Sprintf("edge<nil <-> nil>")
+	graph := path{
+		name:     "@",
+		node:     m.standing,
+		steps:    0,
+		parent:   nil,
+		children: []path{},
+		mapNow:   gr.getCopy(),
 	}
+	fmt.Printf("starting at %v, here's a random path: \n\n", m.standing.hashKey())
+	graph = traverse(0, graph)
 
-	if e.a == nil && e.b != nil {
-		return fmt.Sprintf("edge<nil <-> %v>", e.b.hashKey())
-	}
-
-	if e.a != nil && e.b == nil {
-		return fmt.Sprintf("edge<%v <-> nil>", e.a.hashKey())
-	}
-
-	return fmt.Sprintf("edge<%v <-> %v>", e.a.hashKey(), e.b.hashKey())
-}
-
-type tile struct {
-	id         int
-	key        *string
-	door       *string
-	coord      coord
-	neighbours map[string]edge
-}
-
-// x ...
-func (t tile) x() int {
-	return t.coord.x()
-}
-
-// y ...
-func (t tile) y() int {
-	return t.coord.y()
-}
-
-// eq ...
-func (t tile) eq(t2 *tile) bool {
-	return t.hashKey() == t2.hashKey()
-}
-
-// addEdge ...
-func (t *tile) addEdge(t2 *tile) {
-	e := edge{t, t2}
-	t.neighbours[e.hashKey()] = e
-}
-
-// hashKey ...
-func (t tile) hashKey() string {
-	var key, door string
-	if t.key != nil {
-		key = fmt.Sprintf("%v", *t.key)
-	}
-	if t.door != nil {
-		door = fmt.Sprintf("%v", *t.door)
-	}
-	return fmt.Sprintf("tile<%v, %v, %v, %v>", t.id, key, door, t.coord.hashKey())
-}
-
-// Map ...
-type Map struct {
-	data map[int]map[int]*tile
-
-	doors map[string]*tile
-	keys  map[string]*tile
-
-	pathable map[string]*tile
-
-	xpos int
-	ypos int
-}
-
-// NewMap ...
-func NewMap(input string) (*Map, error) {
-	if input == "" {
-		return nil, fmt.Errorf("bad input, blank string")
-	}
-	base := inputToData(input)
-
-	data := map[int]map[int]*tile{}
-	doors := map[string]*tile{}
-	keys := map[string]*tile{}
-
-	pathable := map[string]*tile{}
-
-	var xpos, ypos, idx int
-
-	for y, tr := range base {
-		row, ok := data[y]
-		if !ok {
-			row = map[int]*tile{}
-		}
-
-		for x, d := range tr {
-			if d == "#" {
-				continue
-			}
-
-			t, ok := row[x]
-			if !ok {
-				t = &tile{id: idx, coord: coord{x, y}, neighbours: map[string]edge{}}
-				idx++
-			}
-
-			if d != "." && d != "@" {
-				if d == strings.ToLower(d) {
-					k := fmt.Sprintf("%v", d)
-					keys[k] = t
-					t.key = &k
-				}
-				if d == strings.ToUpper(d) {
-					dr := fmt.Sprintf("%v", d)
-					doors[dr] = t
-					t.door = &dr
-				}
-			}
-
-			pathable[t.hashKey()] = t
-			row[x] = t
-
-			if d == "@" {
-				xpos = x
-				ypos = y
-			}
-
-			row[x] = t
-		}
-		data[y] = row
-	}
-
-	for y, row := range data {
-		for x, tile := range row {
-			if upr, ok := data[y-1]; ok {
-				// there's a row above this one, see if there's a tile
-				if upt, ok := upr[x]; ok {
-					// there is a tile above this one, add an edge
-					tile.addEdge(upt)
-				}
-			}
-
-			if left, ok := row[x-1]; ok {
-				// there's a tile to the left, add an edge
-				tile.addEdge(left)
-			}
-
-			if right, ok := row[x+1]; ok {
-				// there's a tile to the right, add an edge
-				tile.addEdge(right)
-			}
-
-			if dwnr, ok := data[y+1]; ok {
-				// there's a row below this one, see if there's a tile
-				if dwnt, ok := dwnr[x]; ok {
-					// there is, add edge
-					tile.addEdge(dwnt)
-				}
-			}
-		}
-	}
-
-	// fmt.Printf("pathable:\n")
-	// for n := range pathable {
-	// 	fmt.Printf("n: %v\n", n)
+	// current := graph
+	st := 0
+	// for {
+	// 	if len(current.children) <= 0 {
+	// 		break
+	// 	}
+	// 	current = pickRandom(current.children)
+	// 	fmt.Printf("%v -> %v\n", current.node.hashKey(), current.steps)
+	// 	st += current.steps
 	// }
-	// fmt.Printf("\n\n")
 
-	m := &Map{
-		data:     data,
-		pathable: pathable,
-		keys:     keys,
-		doors:    doors,
-		xpos:     xpos,
-		ypos:     ypos,
+	// fmt.Printf("\n\n")
+	// fmt.Printf("total steps: %v\n", st)
+
+	kgr := gr.keys()
+	keys := []string{"@"}
+	for _, k := range kgr {
+		keys = append(keys, k.key)
 	}
 
-	return m, nil
+	//printPathTo(graph)
+	found := findPaths(0, graph, keys)
+	for _, v := range found {
+		fmt.Printf("%v step path: %v\n", v.steps, v.path)
+	}
+
+	return st
 }
 
-// copy ...
-func (m Map) copy() map[string]*tile {
-	out := map[string]*tile{}
+func pickRandom(in []path) path {
+	if len(in) == 1 {
+		return in[0]
+	}
 
-	for n, t := range m.pathable {
-		tmp := *t
-		nei := map[string]edge{}
-		for nn, e := range tmp.neighbours {
-			nei[nn] = e
+	min := 0
+	max := len(in) - 1
+	p := rand.Intn(max-min) + min
+	return in[p]
+}
+
+func printPathTo(in path) {
+	if len(in.children) == 0 {
+		parents := []string{}
+
+		p := in.parent
+
+		for p != nil {
+			parents = append(parents, p.name)
+			p = p.parent
 		}
 
-		nt := &tile{
-			id:         tmp.id,
-			coord:      tmp.coord,
-			neighbours: nei,
+		for i := len(parents)/2 - 1; i >= 0; i-- {
+			opp := len(parents) - 1 - i
+			parents[i], parents[opp] = parents[opp], parents[i]
 		}
 
-		if tmp.key != nil {
-			var k string
-			k = fmt.Sprintf("%v", *tmp.key)
-			nt.key = &k
-		}
-		if tmp.door != nil {
-			var d string
-			d = fmt.Sprintf("%v", *tmp.door)
-			nt.door = &d
+		parents = append(parents, in.name)
+
+		fmt.Printf("path: %v\n", strings.Join(parents, " -> "))
+		fmt.Printf("final: %v, steps: %v\n", in.name, in.steps)
+		// fmt.Printf("parents: %#v\n", parents)
+		return
+	}
+
+	for _, c := range in.children {
+		printPathTo(c)
+	}
+}
+
+type foundPath struct {
+	path  string
+	steps int
+}
+
+func findPaths(ind int, in path, required []string) []foundPath {
+	out := []foundPath{}
+
+	printWithIndent(ind, "finding path for %v\n", in.name)
+
+	if len(in.children) == 0 {
+		p := in.parent
+		parents := []string{}
+		for p != nil {
+			parents = append(parents, p.name)
+			p = p.parent
 		}
 
-		out[n] = nt
+		for i := len(parents)/2 - 1; i >= 0; i-- {
+			opp := len(parents) - 1 - i
+			parents[i], parents[opp] = parents[opp], parents[i]
+		}
+
+		parents = append(parents, in.name)
+
+		printWithIndent(ind+1, "%v step path: %v\n", in.steps, strings.Join(parents, " -> "))
+
+		if hasAll(parents, required) {
+			// fmt.Printf("doing thing\n")
+			out = append(out, foundPath{strings.Join(parents, " -> "), in.steps})
+		}
+		// fmt.Printf("final: %v, steps: %v\n", in.name, in.steps)
+		// fmt.Printf("parents: %#v\n\n---------\n\n", parents)
+
+		return out
+	}
+
+	for _, c := range in.children {
+		x := findPaths(ind+1, c, required)
+		out = append(out, x...)
 	}
 
 	return out
 }
 
-func findByName(graph map[string]*tile, name string) *tile {
-	for n, t := range graph {
-		if n == name {
-			return t
-		}
-	}
-	return nil
-}
+func hasAll(a, b []string) bool {
+	sort.Strings(a)
+	sort.Strings(b)
 
-func findByDoorOrKey(graph map[string]*tile, name string) *tile {
-	for _, t := range graph {
-		if t.key != nil && *t.key == name {
-			return t
-		}
-
-		if t.door != nil && *t.door == name {
-			return t
-		}
-	}
-	return nil
-}
-
-func findByCoord(graph map[string]*tile, x, y int) *tile {
-	for _, t := range graph {
-		if t.coord.x() == x && t.coord.y() == y {
-			return t
-		}
-	}
-	return nil
-}
-
-// stepsToKey ...
-func (m Map) stepsToKey(from, key string) int {
-	if from == key {
-		return 0
+	// fmt.Printf("parents:  %#v\n", a)
+	// fmt.Printf("required: %#v\n", b)
+	if len(a) != len(b) {
+		// fmt.Printf("not same length:\na: %#v\nb: %#v\n", a, b)
+		return false
 	}
 
-	ng := m.copy()
-
-	var start, end *tile
-
-	if from == "@" {
-		start = findByCoord(ng, m.xpos, m.ypos)
-	} else {
-		start = findByName(ng, from)
-		if start == nil {
-			start = findByDoorOrKey(ng, from)
+	for i := range a {
+		if a[i] != b[i] {
+			// fmt.Printf("value i not same: %v != %v\n", a[i], b[i])
+			return false
 		}
 	}
 
-	if key == "@" {
-		end = findByCoord(ng, m.xpos, m.ypos)
-	} else {
-		end = findByName(ng, key)
-		if end == nil {
-			end = findByDoorOrKey(ng, key)
-		}
-	}
-
-	return bfs(ng, start, end)
-}
-
-type queueNode struct {
-	t    *tile
-	dist int
-}
-
-// bfs returns the number of steps to get from the starting tile to the ending tile.
-// it returns -1 if there is no path that doesn't go through a currently locked door
-func bfs(graph map[string]*tile, start, end *tile) int {
-	if start == nil || end == nil {
-		fmt.Printf("start or end nil\n")
-		return -1
-	}
-
-	visited := map[string]bool{}
-	queue := []queueNode{{start, 0}}
-	md := -1
-	fx, fy := end.x(), end.y()
-
-	for len(queue) > 0 {
-		n := queue[0]
-		queue = queue[1:]
-
-		i, j, dist := n.t.x(), n.t.y(), n.dist
-
-		if i == fx && j == fy {
-			md = dist
-			break
-		}
-
-		for _, nei := range n.t.neighbours {
-			if _, ok := visited[nei.b.hashKey()]; ok {
-				continue
-			}
-
-			visited[nei.b.hashKey()] = true
-
-			if nei.b.door == nil {
-				queue = append(queue, queueNode{nei.b, dist + 1})
-			}
-		}
-	}
-
-	return md
-}
-
-func revTopSort(graph map[string]*tile, st string) []string {
-	ord := []string{}
-	g := graph[st]
-	visited := map[string]bool{
-		g.hashKey(): true,
-	}
-
-	var fn func(v *tile, name string)
-	fn = func(v *tile, name string) {
-		if v == nil {
-			return
-		}
-
-		if len(v.neighbours) == 0 {
-			ord = append(ord, v.hashKey())
-			return
-		}
-
-		valo := false
-		for _, edge := range v.neighbours {
-			n := edge.b.hashKey()
-			if _, ok := visited[n]; ok {
-				continue
-			}
-			valo = true
-			visited[n] = true
-
-			fmt.Printf("\t%v\n", n)
-			fn(graph[n], n)
-		}
-
-		if !valo {
-			return
-		}
-	}
-
-	fmt.Printf("starting with \n%v\n\n", st)
-	fn(g, st)
-	return ord
-}
-
-// keysRequiredForDoor ...
-func (m Map) keysRequiredForDoor(door string) int {
-	return 0
-}
-
-// AllKeySteps ...
-func (m Map) AllKeySteps() int {
-	return 0
+	return true
 }

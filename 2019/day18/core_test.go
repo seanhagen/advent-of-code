@@ -118,27 +118,26 @@ func TestStepsToKey(t *testing.T) {
 	}
 }
 
-func TestKeysRequired(t *testing.T) {
+func TestGetableKeys(t *testing.T) {
 	tests := []struct {
 		input string
-		door  string
-		req   int
+		out   []string
 	}{
 		{`#########
 #b.A.@.a#
-#########`, "A", 0},
+#########`, []string{"a"}},
 
 		{`########################
 #f.D.E.e.C.b.A.@.a.B.c.#
 ######################.#
 #d.....................#
-########################`, "C", 2},
+########################`, []string{"a"}},
 
 		{`########################
 #...............b.C.D.f#
 #.######################
 #.....@.a.B.c.d.A.e.F.g#
-########################`, "E", 5},
+########################`, []string{"a", "b"}},
 
 		{`#################
 #i.G..c...e..H.p#
@@ -148,14 +147,14 @@ func TestKeysRequired(t *testing.T) {
 #k.E..a...g..B.n#
 ########.########
 #l.F..d...h..C.m#
-#################`, "G", 0},
+#################`, []string{"a", "b", "c", "d", "e", "f", "g", "h"}},
 
 		{`########################
 #@..............ac.GI.b#
 ###d#e#f################
 ###A#B#C################
 ###g#h#i################
-########################`, "B", 2},
+########################`, []string{"a", "c", "d", "e", "f"}},
 	}
 
 	for i, x := range tests {
@@ -165,9 +164,9 @@ func TestKeysRequired(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unable to create map: %v", err)
 			}
-			req := m.keysRequiredForDoor(tt.door)
-			if req != tt.req {
-				t.Errorf("wrong of keys required for door %#v, expected %v got %v", tt.door, tt.req, req)
+			out := m.getableKeys()
+			if !strSlicEq(out, tt.out) {
+				t.Errorf("wrong keys, expected %v got %v", tt.out, out)
 			}
 		})
 	}
@@ -215,10 +214,24 @@ func TestAllKeySteps(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unable to create map: %v", err)
 			}
-			steps := m.AllKeySteps()
+			steps := m.SolveP1()
 			if steps != tt.steps {
 				t.Errorf("wrong number of steps, expected %v got %v", tt.steps, steps)
 			}
 		})
 	}
+}
+
+func strSlicEq(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
 }
