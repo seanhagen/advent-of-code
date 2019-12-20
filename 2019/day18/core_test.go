@@ -165,7 +165,7 @@ func TestGetableKeys(t *testing.T) {
 				t.Fatalf("unable to create map: %v", err)
 			}
 			out := m.getableKeys()
-			if !strSlicEq(out, tt.out) {
+			if !strSliceEq(out, tt.out) {
 				t.Errorf("wrong keys, expected %v got %v", tt.out, out)
 			}
 		})
@@ -220,18 +220,4 @@ func TestAllKeySteps(t *testing.T) {
 			}
 		})
 	}
-}
-
-func strSlicEq(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-
-	return true
 }

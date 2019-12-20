@@ -30,21 +30,24 @@ func inputToData(i string) map[int]map[int]string {
 }
 
 type queueNode struct {
-	t    *tile
+	t    tile
 	dist int
 }
 
 // bfs returns the number of steps to get from the starting tile to the ending tile.
 // it returns -1 if there is no path that doesn't go through a currently locked door
-func bfs(graph map[string]*tile, start, end *tile) int {
-	if start == nil || end == nil {
-		return -1
-	}
-
+func bfs(graph grid, start, end tile) int {
 	visited := map[string]bool{}
 	queue := []queueNode{{start, 0}}
 	md := -1
 	fx, fy := end.x(), end.y()
+
+	vecs := [][]int{
+		[]int{1, 0},
+		[]int{-1, 0},
+		[]int{0, 1},
+		[]int{0, -1},
+	}
 
 	for len(queue) > 0 {
 		n := queue[0]
@@ -57,29 +60,28 @@ func bfs(graph map[string]*tile, start, end *tile) int {
 			break
 		}
 
-		for _, nei := range n.t.neighbours {
-			if _, ok := visited[nei.b.hashKey()]; ok {
+		check := []tile{}
+		for _, v := range vecs {
+			x := i + v[0]
+			y := j + v[1]
+			nt := graph.tileAt(x, y)
+			if nt != nil {
+				check = append(check, *nt)
+			}
+		}
+
+		for _, t := range check {
+			if _, ok := visited[t.hashKey()]; ok {
 				continue
 			}
+			visited[t.hashKey()] = true
 
-			visited[nei.b.hashKey()] = true
-
-			if nei.b.door == "" {
-				if end.key != "" && nei.b.key != "" && end.key != nei.b.key {
-					// if we're on a tile with a key
-					// and it's not the same key as our ending key
-					// return -1 because this key should be picked up on this
-					// path before the stated end tile
-					// fmt.Printf("unable to get to %v from %v because tile %v has a key and it's in the way\n", end.hashKey(), start.hashKey(), nei.b.hashKey())
-					//return md
+			if t.door == "" {
+				if t.key != "" && t.key != end.key {
 					continue
 				}
 
-				// if a key is in the way, consider it an invalid path
-				// the key should be picked up first before continuing on this path
-				queue = append(queue, queueNode{nei.b, dist + 1})
-				// } else {
-				// 	fmt.Printf("unable to get to %v from %v because of door %v\n", end.hashKey(), start.hashKey(), nei.b.hashKey())
+				queue = append(queue, queueNode{t, dist + 1})
 			}
 		}
 	}
@@ -87,34 +89,50 @@ func bfs(graph map[string]*tile, start, end *tile) int {
 	return md
 }
 
-func revTopSort(graph map[string]*tile, st string) []string {
+func revTopSort(graph grid, st string) []string {
 	ord := []string{}
-	g := graph[st]
+	g, ok := graph[st]
+	if !ok {
+		return ord
+	}
+
 	visited := map[string]bool{
 		g.hashKey(): true,
 	}
 
-	var fn func(v *tile, name string)
-	fn = func(v *tile, name string) {
-		if v == nil {
-			return
+	vecs := [][]int{
+		[]int{1, 0},
+		[]int{-1, 0},
+		[]int{0, 1},
+		[]int{0, -1},
+	}
+
+	var fn func(t tile, name string)
+	fn = func(t tile, name string) {
+		check := []tile{}
+		for _, v := range vecs {
+			x := t.x() + v[0]
+			y := t.y() + v[1]
+			nt := graph.tileAt(x, y)
+			if nt != nil {
+				check = append(check, *nt)
+			}
 		}
 
-		if len(v.neighbours) == 0 {
-			ord = append(ord, v.hashKey())
+		if len(check) == 0 {
+			ord = append(ord, t.hashKey())
 			return
 		}
 
 		valo := false
-		for _, edge := range v.neighbours {
-			n := edge.b.hashKey()
+		for _, t := range check {
+			n := t.hashKey()
 			if _, ok := visited[n]; ok {
 				continue
 			}
 			valo = true
 			visited[n] = true
 
-			// fmt.Printf("\t%v\n", n)
 			fn(graph[n], n)
 		}
 

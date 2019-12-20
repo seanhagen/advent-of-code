@@ -1,3 +1,7 @@
+=== RUN   TestAllKeySteps
+=== RUN   TestAllKeySteps/test_1
+starting at tile<8, , , coord{15,1}>, here's a random path:
+
 gettable keys from node: [a]
 acting on key a
 distance from node to key a is 2
@@ -33,11 +37,48 @@ removing key b
 ........remove key c
 removing key c
 
-=========== BRANCHES HERE
+================= BRANCH START
 
-............gettable keys from node: [e d]
 
-============== BRANCH e
+===================== BRANCH d
+............gettable keys from node: [d e]
+............parent: c
+............acting on key d
+............distance from node to key d is 24
+............ ########################
+............ #f.D.E.e.............@.#
+............ ######################.#
+............ #d.....................#
+............ ########################
+............remove key d
+removing key d
+
+................gettable keys from node: [e]
+................parent: d
+................acting on key e
+................distance from node to key e is 38
+................ ########################
+................ #f...E.e...............#
+................ ######################.#
+................ #@.....................#
+................ ########################
+................remove key e
+removing key e
+
+....................gettable keys from node: [f]
+....................parent: e
+....................acting on key f
+....................distance from node to key f is 6
+.................... ########################
+.................... #f.....@...............#
+.................... ######################.#
+.................... #......................#
+.................... ########################
+....................remove key f
+removing key f
+
+===================== BRANCH e
+
 ............parent: c
 ............acting on key e
 ............distance from node to key e is 14
@@ -49,7 +90,7 @@ removing key c
 ............remove key e
 removing key e
 
-................gettable keys from node: [d]
+................gettable keys from node: [d f]
 ................parent: e
 ................acting on key d
 ................distance from node to key d is 38
@@ -73,40 +114,50 @@ removing key d
 ....................remove key f
 removing key f
 
-============== BRANCH d
-............parent: c
-............acting on key d
-............distance from node to key d is 24
-............ ########################
-............ #f.D.E...............@.# <- missing the e key?????
-............ ######################.#
-............ #d.....................#
-............ ########################
-............remove key d
-removing key d
-
-................gettable keys from node: [f]
-................parent: d
+................parent: e
 ................acting on key f
-................distance from node to key f is 44
+................distance from node to key f is 6
 ................ ########################
-................ #f...E.................#
+................ #f.D...@...............#
 ................ ######################.#
-................ #@.....................#
+................ #d.....................#
 ................ ########################
 ................remove key f
 removing key f
+
+....................gettable keys from node: [d]
+....................parent: f
+....................acting on key d
+....................distance from node to key d is 44
+.................... ########################
+.................... #@.D...................#
+.................... ######################.#
+.................... #d.....................#
+.................... ########################
+....................remove key d
+removing key d
 
 finding path for @
 ....finding path for a
 ........finding path for b
 ............finding path for c
+................finding path for d
+....................finding path for e
+........................finding path for f
+............................86 step path: @ -> a -> b -> c -> d -> e -> f
 ................finding path for e
 ....................finding path for d
 ........................finding path for f
 ............................114 step path: @ -> a -> b -> c -> e -> d -> f
-................finding path for d
 ....................finding path for f
-........................86 step path: @ -> a -> b -> c -> d -> f    <-- path is missing the e, so not counted as 'correct'
-
+........................finding path for d
+............................82 step path: @ -> a -> b -> c -> e -> f -> d
+86 step path: @ -> a -> b -> c -> d -> e -> f
 114 step path: @ -> a -> b -> c -> d -> e -> f
+82 step path: @ -> a -> b -> c -> d -> e -> f
+--- FAIL: TestAllKeySteps (0.02s)
+    --- FAIL: TestAllKeySteps/test_1 (0.02s)
+        core_test.go:219: wrong number of steps, expected 86 got 82
+FAIL
+exit status 1
+FAIL	github.com/seanhagen/advent-of-code/2019/day18	0.023s

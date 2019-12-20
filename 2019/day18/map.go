@@ -7,17 +7,17 @@ import (
 
 // Map ...
 type Map struct {
-	data map[int]map[int]*tile
+	data map[int]map[int]tile
 
-	doors map[string]*tile
-	keys  map[string]*tile
+	// doors map[string]*tile
+	// keys  map[string]*tile
 
 	pathable grid
 
 	xpos int
 	ypos int
 
-	standing *tile
+	standing tile
 }
 
 // NewMap ...
@@ -27,19 +27,19 @@ func NewMap(input string) (*Map, error) {
 	}
 	base := inputToData(input)
 
-	data := map[int]map[int]*tile{}
-	doors := map[string]*tile{}
-	keys := map[string]*tile{}
+	data := map[int]map[int]tile{}
+	// doors := map[string]tile{}
+	// keys := map[string]tile{}
 
 	pathable := grid{}
 
 	var xpos, ypos, idx int
-	var standing *tile
+	var standing tile
 
 	for y, tr := range base {
 		row, ok := data[y]
 		if !ok {
-			row = map[int]*tile{}
+			row = map[int]tile{}
 		}
 
 		for x, d := range tr {
@@ -49,19 +49,19 @@ func NewMap(input string) (*Map, error) {
 
 			t, ok := row[x]
 			if !ok {
-				t = &tile{id: idx, coord: coord{x, y}, neighbours: map[string]edge{}}
+				t = tile{id: idx, coord: coord{x, y}}
 				idx++
 			}
 
 			if d != "." && d != "@" {
 				if d == strings.ToLower(d) {
 					k := fmt.Sprintf("%v", d)
-					keys[k] = t
+					// keys[k] = t
 					t.key = k
 				}
 				if d == strings.ToUpper(d) {
 					dr := fmt.Sprintf("%v", d)
-					doors[dr] = t
+					// doors[dr] = t
 					t.door = dr
 				}
 			}
@@ -80,41 +80,41 @@ func NewMap(input string) (*Map, error) {
 		data[y] = row
 	}
 
-	for y, row := range data {
-		for x, tile := range row {
-			if upr, ok := data[y-1]; ok {
-				// there's a row above this one, see if there's a tile
-				if upt, ok := upr[x]; ok {
-					// there is a tile above this one, add an edge
-					tile.addEdge(upt)
-				}
-			}
+	// for y, row := range data {
+	// 	for x, tile := range row {
+	// 		if upr, ok := data[y-1]; ok {
+	// 			// there's a row above this one, see if there's a tile
+	// 			if upt, ok := upr[x]; ok {
+	// 				// there is a tile above this one, add an edge
+	// 				tile.addEdge(upt)
+	// 			}
+	// 		}
 
-			if left, ok := row[x-1]; ok {
-				// there's a tile to the left, add an edge
-				tile.addEdge(left)
-			}
+	// 		if left, ok := row[x-1]; ok {
+	// 			// there's a tile to the left, add an edge
+	// 			tile.addEdge(left)
+	// 		}
 
-			if right, ok := row[x+1]; ok {
-				// there's a tile to the right, add an edge
-				tile.addEdge(right)
-			}
+	// 		if right, ok := row[x+1]; ok {
+	// 			// there's a tile to the right, add an edge
+	// 			tile.addEdge(right)
+	// 		}
 
-			if dwnr, ok := data[y+1]; ok {
-				// there's a row below this one, see if there's a tile
-				if dwnt, ok := dwnr[x]; ok {
-					// there is, add edge
-					tile.addEdge(dwnt)
-				}
-			}
-		}
-	}
+	// 		if dwnr, ok := data[y+1]; ok {
+	// 			// there's a row below this one, see if there's a tile
+	// 			if dwnt, ok := dwnr[x]; ok {
+	// 				// there is, add edge
+	// 				tile.addEdge(dwnt)
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	m := &Map{
 		data:     data,
 		pathable: pathable,
-		keys:     keys,
-		doors:    doors,
+		// keys:     keys,
+		// doors:    doors,
 		standing: standing,
 		xpos:     xpos,
 		ypos:     ypos,
@@ -141,7 +141,7 @@ func (m Map) getCopy() grid {
 func findByName(graph grid, name string) *tile {
 	for n, t := range graph {
 		if n == name {
-			return t
+			return &t
 		}
 	}
 	return nil
@@ -150,11 +150,11 @@ func findByName(graph grid, name string) *tile {
 func findByDoorOrKey(graph grid, name string) *tile {
 	for _, t := range graph {
 		if t.key == name {
-			return t
+			return &t
 		}
 
 		if t.door == name {
-			return t
+			return &t
 		}
 	}
 	return nil
@@ -163,7 +163,7 @@ func findByDoorOrKey(graph grid, name string) *tile {
 func findByCoord(graph grid, x, y int) *tile {
 	for _, t := range graph {
 		if t.coord.x() == x && t.coord.y() == y {
-			return t
+			return &t
 		}
 	}
 	return nil
@@ -194,5 +194,9 @@ func (m Map) stepsToKey(from, key string) int {
 		}
 	}
 
-	return m.pathable.tileToTileSteps(start, end)
+	if start == nil || end == nil {
+		return -1
+	}
+
+	return m.pathable.tileToTileSteps(*start, *end)
 }

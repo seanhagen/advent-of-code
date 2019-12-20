@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type grid map[string]*tile
+type grid map[string]tile
 
 func inSlice(a string, s []string) bool {
 	for _, v := range s {
@@ -67,14 +67,14 @@ func (g grid) Print(ind, atx, aty int) {
 func (g grid) tileAt(x, y int) *tile {
 	for _, t := range g {
 		if t.x() == x && t.y() == y {
-			return t
+			return &t
 		}
 	}
 	return nil
 }
 
 // tileToTileSteps ...
-func (g grid) tileToTileSteps(start, end *tile) int {
+func (g grid) tileToTileSteps(start, end tile) int {
 	if start.eq(end) {
 		return 0
 	}
@@ -86,7 +86,7 @@ func (g grid) tileToTileSteps(start, end *tile) int {
 func (g grid) getTileOfKey(in string) *tile {
 	for _, t := range g {
 		if t.key == in {
-			return t
+			return &t
 		}
 	}
 	return nil
@@ -94,11 +94,9 @@ func (g grid) getTileOfKey(in string) *tile {
 
 // foundKeys ...
 func (g grid) removeKey(in string) grid {
-	fmt.Printf("removing key %v\n", in)
 	out := g.getCopy()
 	for k, t := range out {
 		if t.key == in {
-			// fmt.Printf("tile %v matches key\n", t.hashKey())
 			delete(out, k)
 			t.removeKey()
 			out[t.hashKey()] = t
@@ -107,7 +105,6 @@ func (g grid) removeKey(in string) grid {
 	in = strings.ToUpper(in)
 	for k, t := range out {
 		if t.door == in {
-			// fmt.Printf("tile %v matches key door!\n", t.hashKey())
 			delete(out, k)
 			t.removeDoor()
 			out[t.hashKey()] = t
@@ -117,9 +114,8 @@ func (g grid) removeKey(in string) grid {
 }
 
 // getableKeys ...
-func (g grid) getableKeys(from *tile) []*tile {
-	gettable := []*tile{}
-	// g.Print()
+func (g grid) getableKeys(from tile) []tile {
+	gettable := []tile{}
 	for _, t := range g.keys() {
 		dist := g.tileToTileSteps(from, t)
 		if dist >= 0 {
@@ -130,8 +126,8 @@ func (g grid) getableKeys(from *tile) []*tile {
 }
 
 // keys ...
-func (g grid) keys() []*tile {
-	out := []*tile{}
+func (g grid) keys() []tile {
+	out := []tile{}
 	for _, t := range g {
 		if t.key != "" {
 			out = append(out, t)
@@ -141,8 +137,8 @@ func (g grid) keys() []*tile {
 }
 
 // doors ...
-func (g grid) doors() []*tile {
-	out := []*tile{}
+func (g grid) doors() []tile {
+	out := []tile{}
 	for _, t := range g {
 		if t.door != "" {
 			out = append(out, t)
@@ -159,17 +155,12 @@ func (g grid) getCopy() grid {
 	out := make(grid)
 	for n, t := range g {
 		// fmt.Printf("copying tile %v\n", n)
-		nei := map[string]edge{}
-		for nn, e := range t.neighbours {
-			nei[nn] = e
-		}
 
-		nt := &tile{
-			id:         t.id,
-			key:        t.key,
-			door:       t.door,
-			coord:      t.coord,
-			neighbours: nei,
+		nt := tile{
+			id:    t.id,
+			key:   t.key,
+			door:  t.door,
+			coord: t.coord,
 		}
 
 		out[n] = nt
