@@ -1,8 +1,11 @@
 package main
 
 import (
-  "fmt"
-  "os"
+	"fmt"
+	"os"
+
+	"github.com/seanhagen/advent-of-code/2019/day18"
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 /*
@@ -17,7 +20,7 @@ generate a map of the tunnels (your puzzle input).  The tunnels are too narrow t
 
 Only one entrance (marked @) is present among the open passages (marked .) and stone walls (#), but
 you also detect an assortment of keys (shown as lowercase letters) and doors (shown as uppercase
-letters). Keys of a given letter open the door of the same letter: a opens A, b opens B, and so on. 
+letters). Keys of a given letter open the door of the same letter: a opens A, b opens B, and so on.
 You aren't sure which key you need to disable the tractor beam, so you'll need to collect all of
 them.
 
@@ -128,7 +131,24 @@ How many steps is the shortest path that collects all of the keys?
 
 */
 
-func main(){
-  fmt.Printf("nope!\n")
-  os.Exit(1)
+func main() {
+	data := ""
+	err := lib.LoadAndLoop("../input.txt", func(in string) error {
+		data = fmt.Sprintf("%v\n%v", data, in)
+		return nil
+	})
+
+	if err != nil {
+		fmt.Printf("unable to load input: %v\n", err)
+		os.Exit(1)
+	}
+
+	m, err := day18.NewMap(data)
+	if err != nil {
+		fmt.Printf("unable to create map: %v\n", err)
+		os.Exit(1)
+	}
+
+	steps := m.SolveP1()
+	fmt.Printf("steps: %v\n", steps)
 }

@@ -2,7 +2,9 @@ package day18
 
 import (
 	"fmt"
+	"math"
 	"sort"
+	"strings"
 )
 
 type path struct {
@@ -42,7 +44,95 @@ func printWithIndent(ind int, format string, args ...interface{}) {
 	fmt.Printf(format, args...)
 }
 
-// var memory
+var memoizedScore = map[int]map[int]map[string]int{}
+
+func getMS(x, y int, k string) int {
+	xv, ok := memoizedScore[x]
+	if !ok {
+		xv = map[int]map[string]int{}
+	}
+
+	yv, ok := xv[y]
+	if !ok {
+		yv = map[string]int{}
+	}
+	sv, ok := yv[k]
+	if !ok {
+		return -1
+	}
+	return sv
+}
+
+func setMS(x, y int, k string, v int) {
+	xv, ok := memoizedScore[x]
+	if !ok {
+		xv = map[int]map[string]int{}
+	}
+
+	yv, ok := xv[y]
+	if !ok {
+		yv = map[string]int{}
+	}
+	yv[k] = v
+	xv[y] = yv
+	memoizedScore[x] = xv
+}
+
+func score(in path) int {
+	curkey := in.node
+	curgrid := in.mapNow.getCopy()
+	keysFound := strings.Join(in.keysFound, "")
+	if v := getMS(curkey.x(), curkey.y(), keysFound); v >= 0 {
+		// fmt.Printf("returning memoized score for %v, %v, %v ==> %v\n", curkey.x(), curkey.y(), keysFound, v)
+		return v
+	}
+
+	scores := []int{}
+	reachable := curgrid.getableKeys(curkey)
+
+	if len(reachable) == 0 {
+		// fmt.Printf("no more reachable keys\n")
+		return 0
+	}
+
+	for _, k := range reachable {
+		grid := curgrid.getCopy()
+		kyc := []string{}
+		for _, v := range in.keysFound {
+			kyc = append(kyc, v)
+		}
+		kyc = append(kyc, k.key)
+		sort.Strings(kyc)
+		kn := k.key
+		ng := grid.removeKey(kn)
+
+		dist := ng.tileToTileSteps(curkey, k)
+
+		np := path{
+			name:      k.key,
+			node:      k,
+			steps:     in.steps + dist,
+			parent:    &in,
+			children:  []path{},
+			keysFound: kyc,
+			mapNow:    ng.getCopy(),
+		}
+		// fmt.Printf("checking score for keys %v -> %v, dist: %3d, found: %v\n", curkey.key, k.key, dist, in.keysFound)
+
+		ns := score(np) + dist
+		scores = append(scores, ns)
+	}
+	smallest := int(math.MaxInt64 - 1)
+	for _, s := range scores {
+		if s < smallest {
+			smallest = s
+		}
+	}
+	// fmt.Printf("scores: %v --> %v\n", scores, smallest)
+
+	setMS(curkey.x(), curkey.y(), keysFound, smallest)
+	return smallest
+}
 
 // traverse ...
 func traverse(ind int, in path) path {

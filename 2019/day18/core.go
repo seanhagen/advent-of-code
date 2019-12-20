@@ -23,25 +23,27 @@ func (m Map) SolveP1() int {
 		children: []path{},
 		mapNow:   gr.getCopy(),
 	}
-	graph = traverse(0, graph)
 
-	kgr := gr.keys()
-	keys := []string{"@"}
-	for _, k := range kgr {
-		keys = append(keys, k.key)
-	}
+	return score(graph)
 
-	steps := 100000
+	// steps := 100000
 
-	found := findPaths(0, graph, keys)
-	for _, v := range found {
-		if v.steps < steps {
-			steps = v.steps
-		}
-		// fmt.Printf("%v step path: %v\n", v.steps, v.path)
-	}
+	// graph = traverse(0, graph)
 
-	return steps
+	// kgr := gr.keys()
+	// keys := []string{"@"}
+	// for _, k := range kgr {
+	//  keys = append(keys, k.key)
+	// }
+	// found := findPaths(0, graph, keys)
+	// for _, v := range found {
+	// 	if v.steps < steps {
+	// 		steps = v.steps
+	// 	}
+	// 	// fmt.Printf("%v step path: %v\n", v.steps, v.path)
+	// }
+
+	// return steps
 }
 
 type foundPath struct {
