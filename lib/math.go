@@ -7,3 +7,10 @@ func Abs(a int) int {
 	}
 	return a
 }
+
+// slightly faster
+func Abs2(n int) int {
+	x := int64(n)
+	y := x >> 63
+	return int((x ^ y) - y)
+}
