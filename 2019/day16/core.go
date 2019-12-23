@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 const phases = 100
@@ -110,18 +112,11 @@ func modify(input string, pattern []int) int {
 		idx++
 	}
 
-	i := abs(sum) % 10
+	i := lib.Abs(sum) % 10
 
 	// out := strings.Split(strconv.Itoa(sum), "")
 	// i, _ := strconv.Atoi(out[len(out)-1])
 	return i
-}
-
-func abs(n int) int {
-	x := int64(n)
-
-	y := x >> 63
-	return int((x ^ y) - y)
 }
 
 func getPattern(length, itr int) []int {
