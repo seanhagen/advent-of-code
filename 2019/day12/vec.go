@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/seanhagen/advent-of-code/lib"
 )
 
 // Vec represents a 3d vector of x,y,z
@@ -83,12 +85,5 @@ func (v Vec) Eq(v2 Vec) bool {
 
 // Energy ...
 func (v Vec) Energy() int {
-	return abs(v.x) + abs(v.y) + abs(v.z)
-}
-
-func abs(a int) int {
-	if a < 0 {
-		a *= -1
-	}
-	return a
+	return lib.Abs(v.x) + lib.Abs(v.y) + lib.Abs(v.z)
 }
