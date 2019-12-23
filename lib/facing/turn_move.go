@@ -16,6 +16,12 @@ func (m *Mover) TurnAndMove(i Turn) {
 	m.Move(f)
 }
 
+// Turn ...
+func (m *Mover) Turn(i Turn) {
+	mvr := m.cur()
+	mvr.facing = TurnTo(mvr.facing, i)
+}
+
 // MoveForward ...
 func (m *Mover) MoveForward() {
 	mvr := m.cur()
