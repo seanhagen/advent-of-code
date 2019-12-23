@@ -1,5 +1,12 @@
 package main
 
+import (
+	"fmt"
+	"os"
+
+	"github.com/seanhagen/advent-of-code/2016/day01"
+)
+
 /*
 
 --- Day 1: No Time for a Taxicab ---
@@ -33,4 +40,16 @@ How many blocks away is Easter Bunny HQ?
 
 */
 
-func main(){}
+func main() {
+	ans, err := day01.NewAnswer("../input.txt")
+	if err != nil {
+		fmt.Printf("unable to get solver: %v\n")
+		os.Exit(1)
+	}
+	out, err := ans.Process()
+	if err != nil {
+		fmt.Printf("unable to process answer: %v\n")
+		os.Exit(1)
+	}
+	fmt.Printf("%v blocks away\n", out)
+}
