@@ -6,20 +6,20 @@ import (
 	"strings"
 )
 
-func SolveCaptcha(in string) int {
+func solver(in string, dist int) int {
+
 	in = strings.TrimSpace(in)
 	bits := strings.Split(in, "")
 	parts := []string{}
 
 	for i, v := range bits {
-		if i != len(bits)-1 {
-			if bits[i] == bits[i+1] {
-				parts = append(parts, v)
-			}
-		} else {
-			if bits[i] == bits[0] {
-				parts = append(parts, v)
-			}
+		p := i + dist
+		if p >= len(bits) {
+			p -= len(bits)
+		}
+
+		if bits[i] == bits[p] {
+			parts = append(parts, v)
 		}
 	}
 
@@ -37,4 +37,14 @@ func SolveCaptcha(in string) int {
 	}
 
 	return output
+
+}
+
+func SolveCaptcha(in string) int {
+	return solver(in, 1)
+}
+
+func SolveCaptchaFiveStep(in string) int {
+	dist := len(in) / 2
+	return solver(in, dist)
 }
