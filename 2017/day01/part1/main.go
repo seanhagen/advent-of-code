@@ -1,5 +1,13 @@
 package main
 
+import (
+	"fmt"
+	"os"
+
+	"github.com/seanhagen/advent-of-code/2017/day01"
+	"github.com/seanhagen/advent-of-code/lib"
+)
+
 /*
 
 --- Day 1: Inverse Captcha ---
@@ -47,4 +55,14 @@ What is the solution to your captcha?
 
 */
 
-func main() {}
+func main() {
+	input, err := lib.GetString("../input.txt")
+	if err != nil {
+		fmt.Printf("unable to load input file: %v\n", err)
+		os.Exit(1)
+	}
+
+	out := day01.SolveCaptcha(input)
+
+	fmt.Printf("sum is %v\n", out)
+}
