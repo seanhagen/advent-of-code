@@ -1,5 +1,13 @@
 package main
 
+import (
+	"fmt"
+	"os"
+
+	"github.com/seanhagen/advent-of-code/2017/day02"
+	"github.com/seanhagen/advent-of-code/lib"
+)
+
 /*
 
 --- Day 2: Corruption Checksum ---
@@ -29,4 +37,14 @@ What is the checksum for the spreadsheet in your puzzle input?
 
 */
 
-func main() {}
+func main() {
+	input, err := lib.GetString("../input.txt")
+	if err != nil {
+		fmt.Printf("unable to load input: %v\n", err)
+		os.Exit(1)
+	}
+
+	checksum := day02.GetChecksum(input)
+
+	fmt.Printf("got checksum: %v\n", checksum)
+}
