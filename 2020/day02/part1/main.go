@@ -44,7 +44,6 @@ const f = "%d %d %s %s"
 
 func main() {
 	num := 0
-
 	p := func(i string) (int, int, string, string, error) {
 		var min, max int
 		var letter, pw string
