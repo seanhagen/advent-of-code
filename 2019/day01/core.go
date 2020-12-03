@@ -21,6 +21,4 @@ func CalcFuelRecurse(in int) int {
 		totalFuel += o
 		in = o
 	}
-
-	return 0
 }

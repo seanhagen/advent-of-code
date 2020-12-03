@@ -1,5 +1,14 @@
 package main
 
+import (
+	"fmt"
+	"os"
+	"strconv"
+
+	day1 "github.com/seanhagen/advent-of-code/2020/day01"
+	"github.com/seanhagen/advent-of-code/lib"
+)
+
 /*
 --- Day 1: Report Repair ---
 After saving Christmas five years in a row, you've decided to take a vacation at a nice
@@ -37,3 +46,25 @@ together produces 1721 * 299 = 514579, so the correct answer is 514579.
 Of course, your expense report is much larger. Find the two entries that sum to 2020;
 what do you get if you multiply them together?
 */
+
+func main() {
+	nums := []int{}
+	err := lib.LoadAndLoop("../input.txt", func(l string) error {
+		i, err := strconv.Atoi(l)
+		if err != nil {
+			return err
+		}
+		nums = append(nums, i)
+		return nil
+	})
+	if err != nil {
+		fmt.Printf("Unable to load input.txt: %v\n", err)
+		os.Exit(1)
+	}
+	a, b, err := day1.FindEntries(nums, 2020)
+	if err != nil {
+		fmt.Printf("Unable to find entries: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("found %v, %v -- multiplied: %v\n", a, b, a*b)
+}
