@@ -1,5 +1,13 @@
 package main
 
+import (
+	"fmt"
+	"os"
+
+	day3 "github.com/seanhagen/advent-of-code/2020/day03"
+	"github.com/seanhagen/advent-of-code/lib"
+)
+
 /*
 --- Day 3: Toboggan Trajectory ---
 
@@ -72,4 +80,28 @@ how many trees would you encounter?
 
 */
 
-func main() {}
+func main() {
+	hill := ""
+	lib.LoadAndLoop("../input.txt", func(ln string) error {
+		if hill == "" {
+			hill = fmt.Sprintf("%v", ln)
+		} else {
+			hill = fmt.Sprintf("%v\n%v", hill, ln)
+		}
+
+		return nil
+	})
+
+	s, err := day3.NewSled(3, 1, hill)
+	if err != nil {
+		fmt.Printf("Unable to create sled: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err = s.Run(); err != nil {
+		fmt.Printf("Error encountered while running sled: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Path intersects %v trees\n\n", s.NumTrees())
+}

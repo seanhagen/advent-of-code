@@ -7,6 +7,7 @@ import (
 
 type Grid struct {
 	rows []Row
+	l    int
 }
 
 func NewGrid(s string) (*Grid, error) {
@@ -32,7 +33,7 @@ func NewGrid(s string) (*Grid, error) {
 		}
 	}
 
-	return &Grid{rows: rows}, nil
+	return &Grid{rows: rows, l: l}, nil
 }
 
 // TreeAt ...
@@ -40,13 +41,42 @@ func (g *Grid) TreeAt(x, y int) bool {
 	if g == nil {
 		return false
 	}
-	nr := len(g.rows) - 1
-	if y > nr {
+	nr := len(g.rows)
+	if y >= nr {
 		return false
 	}
 
 	r := g.rows[y]
-	return r.TreeAt(x)
+
+	l := len(r.trees)
+	nx := (x%l + l) % l
+
+	z := r.TreeAt(nx)
+	return z
+}
+
+// PrintTreeAt ...
+func (g *Grid) PrintTreeAt(x, y int) bool {
+	ret := false
+	l := len(g.rows[0].trees)
+	x = (x%l + l) % l
+	for i, v := range g.rows {
+		for j, vv := range v.trees {
+			if i == y && j == x {
+				if vv == Tree {
+					fmt.Printf("X")
+					ret = true
+				} else {
+					fmt.Printf("0")
+				}
+
+			} else {
+				fmt.Printf("%v", vv)
+			}
+		}
+		fmt.Printf("\n")
+	}
+	return ret
 }
 
 // Height ...
