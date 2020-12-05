@@ -2,6 +2,7 @@ package day3
 
 import (
 	"fmt"
+	"sort"
 	"testing"
 )
 
@@ -104,5 +105,75 @@ func TestRunSled(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestMultiSled(t *testing.T) {
+	ex := `..##.......
+#...#...#..
+.#....#..#.
+..#.#...#.#
+.#...##..#.
+..#.##.....
+.#.#.#....#
+.#........#
+#.##...#...
+#...##....#
+.#..#...#.#`
+
+	tests := []struct {
+		input  string
+		vx, vy int
+		f      int
+	}{
+		{ex, 1, 1, 2},
+		{ex, 3, 1, 7},
+		{ex, 5, 1, 3},
+		{ex, 7, 1, 4},
+		{ex, 1, 2, 2},
+	}
+	shouldFind := []int{}
+	found := []int{}
+
+	for i, x := range tests {
+		tt := x
+		t.Run(fmt.Sprintf("test_%v", i), func(t *testing.T) {
+			s, err := NewSled(tt.vx, tt.vy, tt.input)
+			if err != nil {
+				t.Fatalf("unable to create sled: %v", err)
+			}
+			if s == nil {
+				t.Fatalf("no error but no sled?")
+			}
+
+			err = s.Run()
+			if err != nil {
+				t.Fatalf("error running sled: %v", err)
+			}
+
+			shouldFind = append(shouldFind, tt.f)
+			f := s.NumTrees()
+			found = append(found, f)
+			if f != tt.f {
+				t.Errorf("wrong output, expected %v got %v", tt.f, f)
+			}
+		})
+	}
+	sort.Ints(shouldFind)
+	sort.Ints(found)
+
+	p := func(in []int) int {
+		o := 1
+		for _, v := range in {
+			o *= v
+		}
+		return o
+	}
+
+	e := p(shouldFind)
+	g := p(found)
+
+	if e != g {
+		t.Errorf("final result wrong, expected %v got %v", e, g)
 	}
 }
