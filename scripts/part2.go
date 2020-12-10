@@ -77,13 +77,13 @@ func part2() {
 
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
 	if err != nil {
-		fmt.Printf("unable to open file: %v\n")
+		fmt.Printf("unable to open file '%v', reason: %v\n", path, err)
 		os.Exit(1)
 	}
 
 	n, err := f.WriteString(buf.String())
 	if err != nil {
-		fmt.Printf("unable to write to file: %v\n")
+		fmt.Printf("unable to write to file: %v\n", err)
 		os.Exit(1)
 	}
 

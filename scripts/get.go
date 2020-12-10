@@ -99,18 +99,37 @@ func get() {
 		os.Exit(1)
 	}
 
+	mode := os.ModePerm
+	dirpath := fmt.Sprintf("../%v/day%v", year, dt)
+	if _, err := os.Stat(dirpath); os.IsNotExist(err) {
+		err = os.Mkdir(dirpath, mode)
+		if err != nil {
+			fmt.Printf("Unable to create directory '%v', reason: %v\n", dirpath, err)
+			os.Exit(1)
+		}
+	}
+
+	dirpath = fmt.Sprintf("../%v/day%v/part1", year, dt)
+	if _, err := os.Stat(dirpath); os.IsNotExist(err) {
+		err = os.Mkdir(dirpath, mode)
+		if err != nil {
+			fmt.Printf("Unable to create directory '%v', reason: %v\n", dirpath, err)
+			os.Exit(1)
+		}
+	}
+
 	path := fmt.Sprintf("../%v/day%v/part1/main.go", year, dt)
 	fmt.Printf("output to file: %v\n", path)
 
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
 	if err != nil {
-		fmt.Printf("unable to open file: %v\n")
+		fmt.Printf("unable to open file '%v', reason: %v\n", path, err)
 		os.Exit(1)
 	}
 
 	n, err := f.WriteString(buf.String())
 	if err != nil {
-		fmt.Printf("unable to write to file: %v\n")
+		fmt.Printf("unable to write to file: %v\n", err)
 		os.Exit(1)
 	}
 
