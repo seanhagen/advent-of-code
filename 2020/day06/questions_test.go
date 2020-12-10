@@ -59,3 +59,31 @@ a`, 1},
 		})
 	}
 }
+
+func TestEveryoneYes(t *testing.T) {
+	tests := []struct {
+		input string
+		num   int
+	}{
+		{"abc", 3},
+		{`a
+b
+c`, 0},
+		{`ab
+ac`, 1},
+		{`a
+a
+a
+a`, 1},
+		{"b", 1},
+	}
+	for i, x := range tests {
+		tt := x
+		t.Run(fmt.Sprintf("test_%v", i), func(t *testing.T) {
+			n := EveryoneYes(tt.input)
+			if n != tt.num {
+				t.Errorf("wrong number of questions, expected %v got %v", tt.num, n)
+			}
+		})
+	}
+}

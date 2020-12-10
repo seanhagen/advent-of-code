@@ -12,6 +12,7 @@ require (
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/golang/groupcache v0.0.0-20191027212112-611e8accdfc9 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
+	github.com/mpvl/unique v0.0.0-20150818121801-cbe035fff7de
 	github.com/paulmach/go.geo v0.0.0-20180829195134-22b514266d33
 	github.com/paulmach/go.geojson v1.4.0 // indirect
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
