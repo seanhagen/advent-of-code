@@ -76,6 +76,19 @@ a
 a
 a`, 1},
 		{"b", 1},
+		{`xeu
+uoe
+tnpeox
+e
+vrdzwglecbk`, 1},
+		{`nucwl
+hnmx
+fqv`, 0},
+		{`su
+s
+s
+s
+s`, 1},
 	}
 	for i, x := range tests {
 		tt := x

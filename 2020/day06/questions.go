@@ -4,6 +4,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/mpvl/unique"
 )
 
@@ -41,6 +42,7 @@ func EveryoneYes(in string) int {
 			count++
 		}
 	}
+	spew.Dump(f, counts, numPeople, count)
 
 	return count
 }
@@ -74,6 +76,9 @@ func getAnswered(in string) map[int][]string {
 	found := map[int][]string{}
 	bits := strings.Split(in, "\n")
 	for i, v := range bits {
+		if v == "" {
+			continue
+		}
 		found[i] = strings.Split(v, "")
 	}
 
