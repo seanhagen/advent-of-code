@@ -99,7 +99,7 @@ func get() {
 		os.Exit(1)
 	}
 
-	mode := os.ModePerm
+	mode := os.ModePerm | os.ModeDir
 	dirpath := fmt.Sprintf("../%v/day%v", year, dt)
 	if _, err := os.Stat(dirpath); os.IsNotExist(err) {
 		err = os.Mkdir(dirpath, mode)
@@ -110,7 +110,8 @@ func get() {
 	}
 
 	dirpath = fmt.Sprintf("../%v/day%v/part1", year, dt)
-	if _, err := os.Stat(dirpath); os.IsNotExist(err) {
+	if _, err = os.Stat(dirpath); os.IsNotExist(err) {
+
 		err = os.Mkdir(dirpath, mode)
 		if err != nil {
 			fmt.Printf("Unable to create directory '%v', reason: %v\n", dirpath, err)
