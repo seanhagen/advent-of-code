@@ -1,8 +1,8 @@
 package main
 
 import (
-  "fmt"
-  "os"
+	"fmt"
+	"os"
 )
 
 /*
@@ -29,7 +29,6 @@ vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.
 faded blue bags contain no other bags.
 dotted black bags contain no other bags.
 
-
 These rules specify the required contents for 9 bag types. In this example, every faded blue bag is
 empty, every vibrant plum bag contains 11 bags (5 faded blue and 6 dotted black), and so on.
 
@@ -55,7 +54,7 @@ long; make sure you get all of it.)
 
 */
 
-func main(){
-  fmt.Printf("nope!\n")
-  os.Exit(1)
+func main() {
+	fmt.Printf("nope!\n")
+	os.Exit(1)
 }
